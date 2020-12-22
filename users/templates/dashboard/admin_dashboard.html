@@ -1,0 +1,188 @@
+{% extends "admin.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div id="main-wrapper" class="container-fluid p-h-lg">
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-4 col-md-12">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Cutting Status</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive project-stats">
+                        <table class="table table-hover table-striped table-border" width="100%">
+                            <thead>
+                                <tr>
+                                    <th width="50%">#</th>
+                                    <th width="50%">Cutting</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Today</th>
+                                    <td>6423</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Day</th>
+                                    <td>10245</td>
+                                </tr>
+                                <tr>
+                                    <th>This Week</th>
+                                    <td>27500</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Week</th>
+                                    <td>51955</td>
+                                </tr>
+                                <tr>
+                                    <th>This Month</th>
+                                    <td>89770</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Month</th>
+                                    <td>318773</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Production Status</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive project-stats">
+                        <table class="table table-hover table-striped table-border" id="sewing-input">
+                            <thead>
+                                <tr>
+                                    <th width="40%">#</th>
+                                    <th width="30%">Input</th>
+                                    <th width="30%">Output</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Today</th>
+                                    <td><span class="input-today">0</span></td>
+                                    <td><span class="output-today">2366</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Last Day</th>
+                                    <td><span class="input-last-day">17148</span></td>
+                                    <td><span class="output-last-day">16609</span></td>
+                                </tr>
+                                <tr>
+                                    <th>This Week</th>
+                                    <td><span class="input-this-week">32253</span></td>
+                                    <td><span class="output-this-week">35401</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Last Week</th>
+                                    <td><span class="input-last-week">74090</span></td>
+                                    <td><span class="output-last-week">73618</span></td>
+                                </tr>
+                                <tr>
+                                    <th>This Month</th>
+                                    <td><span class="input-this-month">121903</span></td>
+                                    <td><span class="output-this-month">126425</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Last Month</th>
+                                    <td><span class="input-last-month">322325</span></td>
+                                    <td><span class="output-last-month">317104</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-12">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Rejection Status</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive project-stats">
+                        <table class="table table-border table-striped table-hover" id="allrejection">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Fabric</th>
+                                    <th>Print</th>
+                                    <th>Sewing</th>
+                                    <th>Washing</th>
+                                </tr>
+                            </thead>
+                            <tbody class="all-rejection">
+                                <tr>
+                                    <td><b>Today</b></td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Last Day</b></td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr>
+                                    <td><b>This Week</b></td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Last Week</b></td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>16</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr>
+                                    <td><b>This Month</b></td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>16</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Last Month</b></td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>29</td>
+                                    <td>5</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+
+        // CounterUp Plugin
+        $('.counter').counterUp({
+            delay: 10,
+            time: 1000
+        });
+
+    });
+</script>
+{% endblock %}
