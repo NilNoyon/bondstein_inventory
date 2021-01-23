@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}{% endblock %} - Bondstein Technology Ltd.</title>
+        <meta content="width=device-width, initial-scale=1" name="viewport"/>
+        <meta name="description" content="Inventory Management System" />
+        <!-- #Author2 -->
+        <meta name="author" content="Noyon Islam" />
+        {% include "links.html" %}
+        {% block css %}{% endblock %}
+    </head>
+    <body class="{% block bodyClass %}{% endblock %}">
+        {% block main %}{% endblock %}
+        {% include "scripts.html" %}
+        {% block scripts %}{% endblock %}
+        <script>
+            $( document ).ready(function() {
+
+              {% if messages %}
+                {% for message in messages %}
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 5000
+                    };
+                    toastr.{{ message.tags }}('{{ message }}');
+                {% endfor %}
+              {% endif %}
+
+            });
+        </script>
+    </body>
+</html>

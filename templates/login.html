@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Bendstein Technology Ltd. - Inventory Management System</title>
+        <meta content="width=device-width, initial-scale=1" name="viewport"/>
+        <meta name="description" content="Inventory Management System" />
+        <!-- #Author2 -->
+        <meta name="author" content="Noyon Islam" />
+        <link href="{% static 'plugins/pace-master/themes/orange/pace-theme-flash.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="{% static 'plugins/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="{% static 'plugins/toastr/toastr.min.css' %}" rel="stylesheet" type="text/css"/>
+        <!-- Theme Styles -->
+        <link href="{% static 'css/modern.css' %}" rel="stylesheet" type="text/css"/>
+        <style>
+            .page-inner {
+                padding: 0 0 50px 0;
+                background: #D0D3D4 !important;
+                position: relative;
+                /*background-image: url("assets/images/gallery/tbackground.png");*/
+            }
+
+            .card-container.card {
+                max-width: 400px;
+                padding: 40px 40px;
+                overflow-x: hidden;
+            }
+
+            /*
+             * Card component
+             */
+            .card {
+                background-color: #FFF;
+                overflow-x: hidden;
+                /* just in case there no content*/
+                padding: 10px 15px 20px;
+                margin: 0 auto 25px;
+                /*margin-top: 0px;*/
+
+                /* shadows and rounded borders */
+                -moz-border-radius: 2px;
+                -webkit-border-radius: 2px;
+                border-radius: 2px;
+                -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+                -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+                box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+            }
+
+            .profile-img-card {
+                width: 96px;
+                height: 96px;
+                margin: 0 auto 10px;
+                display: block;
+                -moz-border-radius: 50%;
+                -webkit-border-radius: 50%;
+                border-radius: 50%;
+            }
+
+            /*
+             * Form styles
+             */
+            .profile-name-card {
+                font-size: 16px;
+                font-weight: bold;
+                text-align: center;
+                margin: 10px 0 0;
+                min-height: 1em;
+            }
+            </style>
+    </head>
+    <body>
+        <main class="page-content" style="min-height:200%;min-width:100%;position: fixed;background: #d0d3d4">
+            <div class="page-inner">
+                <div id="main-wrapper">
+                    <div class="container" style="padding-top: 70px;">
+                        <div class="card card-container">
+                            <img id="profile-img" class="profile-img-card" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" />
+                            <p id="profile-name" class="profile-name-card"></p>
+                            <div class="login-box">
+                                <a href="#" class="logo-name text-lg text-center">Inventory Management System</a>
+                                <p class="text-center m-t-md">A real-time inventory management system</p>
+                                <form class="m-t-md" action="{% url 'users:login' %}" method="post">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <input name="username" type="text" class="form-control" placeholder="Username" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input name="password" type="password" class="form-control" placeholder="Password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-success btn-block">Login</button>
+                                </form>
+                                <p class="text-center m-t-xs text-sm" style="font-weight: 900; font-style: italic"> &copy; Bondstein Technologies Ltd.</p>
+                            </div>
+                        </div><!-- /card-container -->
+                </div><!-- Main Wrapper -->
+            </div><!-- Page Inner -->
+        </main><!-- Page Content -->
+        <script type="text/javascript" src="{% static '/plugins/jquery/jquery-2.1.4.min.js' %}"></script>
+        <script type="text/javascript" src="{% static '/plugins/jquery-ui/jquery-ui.min.js' %}"></script>
+        <script type="text/javascript" src="{% static '/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" src="{% static '/plugins/waves/waves.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'plugins/toastr/toastr.min.js' %}"></script>
+        <script>
+            $( document ).ready(function() {
+
+              {% if messages %}
+                {% for message in messages %}
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 5000
+                    };
+                    toastr.{{ message.tags }}('{{ message }}');
+                {% endfor %}
+              {% endif %}
+
+            });
+        </script>
+    </body>
+</html>

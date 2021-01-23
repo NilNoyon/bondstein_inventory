@@ -1,0 +1,160 @@
+{% extends "admin.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div id="main-wrapper" class="container-fluid p-h-lg">
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-4 col-md-12">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Stock In Status</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive project-stats">
+                        <table class="table table-hover table-striped table-border" width="100%">
+                            <thead>
+                                <tr>
+                                    <th width="50%">#</th>
+                                    <th width="50%">Vendor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Today</th>
+                                    <td>6423</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Day</th>
+                                    <td>10245</td>
+                                </tr>
+                                <tr>
+                                    <th>This Week</th>
+                                    <td>27500</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Week</th>
+                                    <td>51955</td>
+                                </tr>
+                                <tr>
+                                    <th>This Month</th>
+                                    <td>89770</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Month</th>
+                                    <td>318773</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Stock Out Status</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive project-stats">
+                        <table class="table table-hover table-striped table-border" width="100%">
+                            <thead>
+                                <tr>
+                                    <th width="50%">#</th>
+                                    <th width="50%">Client</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Today</th>
+                                    <td>6423</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Day</th>
+                                    <td>10245</td>
+                                </tr>
+                                <tr>
+                                    <th>This Week</th>
+                                    <td>27500</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Week</th>
+                                    <td>51955</td>
+                                </tr>
+                                <tr>
+                                    <th>This Month</th>
+                                    <td>89770</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Month</th>
+                                    <td>318773</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-12">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Damage Status</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive project-stats">
+                        <table class="table table-hover table-striped table-border" width="100%">
+                            <thead>
+                                <tr>
+                                    <th width="50%">#</th>
+                                    <th width="50%">Damage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Today</th>
+                                    <td>6423</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Day</th>
+                                    <td>10245</td>
+                                </tr>
+                                <tr>
+                                    <th>This Week</th>
+                                    <td>27500</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Week</th>
+                                    <td>51955</td>
+                                </tr>
+                                <tr>
+                                    <th>This Month</th>
+                                    <td>89770</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Month</th>
+                                    <td>318773</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+
+        // CounterUp Plugin
+        $('.counter').counterUp({
+            delay: 10,
+            time: 1000
+        });
+
+    });
+</script>
+{% endblock %}

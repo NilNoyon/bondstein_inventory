@@ -1,0 +1,98 @@
+<div class="page-sidebar sidebar horizontal-bar">
+    <div class="page-sidebar-inner p-h-xs">
+        <ul class="menu text-left accordion-menu text-uppercase">
+            <li class="active"><a href="{% url 'users:dashboard' %}"><span class="menu-icon icon-home"></span><p>Dashboard</p></a></li>
+            <li class="droplink">
+                <a href="#">
+                    <span class="menu-icon icon-users"></span>
+                    <p>Suppliers</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li><a href="{% url 'supplier_list' %}">Suppliers</a></li>
+                </ul>
+            </li>
+            <li class="droplink">
+                <a href="#">
+                    <span class="menu-icon icon-tag"></span>
+                    <p>Items</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li><a href="{% url 'item_categories' %}">Item Category</a></li>
+                    <li><a href="{% url 'items' %}">Items</a></li>
+                </ul>
+            </li>
+            <li class="droplink">
+                <a href="#">
+                    <span class="menu-icon icon-grid"></span>
+                    <p>Pre Order</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li><a href="{% url 'add_manual_po' %}">Add Manual PO</a></li>
+                    <li><a href="{% url 'upload_pdf' %}">Add PDF PO</a></li>
+                    <li><a href="{% url 'pre_order_list' %}">PO List</a></li>
+                </ul>
+            </li>
+            <li class="droplink">
+                <a href="#">
+                    <span class="fa fa-barcode"></span>
+                    <p>Barcode</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li><a href="{% url 'generate_barcode' %}">Generate Barcode</a></li>
+                    <li><a href="{% url 'generate_manual_barcode' %}">Generate Manual Barcode</a></li>
+                    <!-- <li><a href="{% url 'scan_barcode' %}">Scan Barcode</a></li> -->
+                </ul>
+            </li>
+            <li class="droplink">
+                <a href="#">
+                    <span class="menu-icon icon-list"></span>
+                    <p>Stock</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li><a href="{% url 'scanned_product_list' %}">Scanned Products</a></li>
+                    <li><a href="{% url 'stock_list' %}">Stock</a></li>
+                    <li><a href="{% url 'stock_log' %}">Stock Log</a></li>
+                </ul>
+            </li>
+            <li class="droplink">
+                <a href="#">
+                    <span class="menu-icon icon-users"></span>
+                    <p>Client</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li><a href="{% url 'client' %}">Clients</a></li>
+                </ul>
+            </li>
+            <!-- <li class="droplink">
+                <a href="#">
+                    <span class="menu-icon icon-grid"></span>
+                    <p>Post Order</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li><a href="#">Add Challan</a></li>
+                </ul>
+            </li> -->
+            {% if request.user.is_superuser %}
+            <li>
+                <a href="#">
+                    <span class="menu-icon icon-settings"></span>
+                    <p>Settings</p><span class="arrow"></span>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li><a href="{% url 'users:other_settings' %}">Role, Warehouse, Status</a></li>
+                    <li><a href="{% url 'users:users_settings' %}">Users</a></li>
+                </ul>
+            </li>
+            {% endif %}
+
+        </ul>
+    </div><!-- Page Sidebar Inner -->
+</div><!-- Page Sidebar -->

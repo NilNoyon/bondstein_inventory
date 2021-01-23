@@ -1,0 +1,225 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Add Manual PO Form{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Add Manual PO</h4>
+                        <div class="panel-control">
+                            <a href="{% url 'pre_order_list' %}"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-list"></i> list</button></a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="m-t-sm">
+                            <form class="m-t-md" id="poForm" action="{% url 'save_preorder' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" id="po_id" value="{{ po.id }}">
+                                <div class="row no-m">
+                                    <div class="col-md-5">
+                                        <div class="panel panel-white">
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="supplier">Supplier:</label>
+                                                        <select class="form-control m-b-sm supplier" id="supplier" name="supplier" required>
+                                                            <option value="">Select A Supplier</option>
+                                                            {% for supplier in suppliers %}
+                                                            <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="order_no">Order No:</label>
+                                                            <input name="order_no" type="text" class="form-control" id="po_no" placeholder="Enter PO Number..." value="{{ po.po_no }}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="quot">Quot:</label>
+                                                            <input name="quot" type="text" class="form-control" id="quot" placeholder="Enter Quot..." value="{{ po.quote }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="order_grand_total">Order Grand Total</label>
+                                                            <input name="order_grand_total" type="number" class="form-control" id="order_grand_total" placeholder="Enter Grand Total..." value="{{ po.order_grand_total|default:0 }}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="order_date">Order Date:</label>
+                                                            <input name="order_date" type="text" class="form-control date-picker" id="order_date" placeholder="Enter Order Date..." value="{{ po.order_date|date:'m/d/Y' }}" autocomplete="Off">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="shipping_date">Shipping Date:</label>
+                                                            <input name="shipping_date" type="text" class="form-control date-picker" id="shipping_date" placeholder="Enter Shipping Date..." value="{{ po.shipping_date|date:'m/d/Y' }}" autocomplete="Off">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="prepared_by">Prepared By:</label>
+                                                            <input name="prepared_by" type="text" class="form-control" id="quote" placeholder="Enter Username..." value="{{ po.prepared_by }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="checked_by">Checked By</label>
+                                                            <input name="checked_by" type="text" class="form-control" id="checked_by" placeholder="Enter Username..." value="{{ po.checked_by}}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                           <label for="status">Select Status :</label>
+                                                           <select class="form-control m-b-sm status" name="status">
+                                                                {% for st in status %}
+                                                                <option value="{{ st.id }}" selected>{{ st.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="panel panel-white">
+                                            <div class="panel-body">
+                                                <div class="row duplicateMe">
+                                                    <input type="hidden" name="pd_id" value="0">
+                                                    <!-- <div class="col-md-3">
+                                                        <select class="form-control m-b-sm item" id="item" name="item" required>
+                                                            <option value="">Select An Item</option>
+                                                            {% for item in items %}
+                                                            <option value="{{ item.id }}">{{ item.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div> -->
+                                                    <div class="col-md-3">
+                                                        <select class="form-control m-b-sm item_details" id="item_details" name="item_details" required>
+                                                            <option value="">Select An Item - (unit price)</option>
+                                                            {% for item in item_details %}
+                                                            <option value="{{ item.id }}">{{ item.name }} - {{ item.unit_price }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <input type="number" class="form-control quantity" name="quantity" placeholder="Quantity">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <input type="number" class="form-control amount" name="amount" placeholder="Amount">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <button type="button" class="btn btn-success" style="margin-top: 1px;" id="repeat"><i class="fa fa-plus"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success btn-block"><h4>Save Information</h4></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // Select2
+    $('.status').select2({placeholder: "Select Status"});
+    $('.supplier').select2({placeholder: "Select Supplier"});
+    $('.item').select2({placeholder: "Select Item Head"});
+    $('.item_details').select2({placeholder: "Select Item"});
+
+    // DatePicker
+    $('.date-picker').datepicker({
+        orientation: "top auto",
+        autoclose: true,
+        todayBtn: 'linked',
+        startDate: new Date()
+    });
+
+
+
+    // Duplicate Form Data
+    $('body').on('click', '#repeat', function(){
+        $duplicate = $('.duplicateMe');
+
+        $duplicate.find('span').remove();
+
+        var clone = $duplicate.html();
+		$('.duplicateMe').parent().append('<div class="row duplicateMe">'+clone+'</div>');
+
+        $(this).parent().append('<button type="button" class="btn btn-danger" style="margin-top: 1px;" id="remove"><i class="fa fa-close"></i></button>');
+        $(this).remove();
+        $duplicate.removeClass('duplicateMe');
+    });
+
+    // Remove Form data
+    $('body').on('click', '#remove', function(){
+        $(this).parent().parent().remove();
+    });
+
+    $("#poForm").on('change', '#item', function(){
+        var item = $(this).val();
+        $.ajax({
+            url : "{% url "ajax_get_item_details" %}",
+            type : "POST",
+            data : { item : item },
+            success : function(data) {
+                // $(".item_details").empty().append('<option value=""></option>');
+                // $(".item_details").select2('destroy');
+                // $(".item_details").select2({placeholder: "Select Item", data: data[0], width: '100%'});
+
+                $(".item_details").append($('<option>Select Item</option>'));
+                for (var i = 0; i < data.length; i++) {
+                  $(".item_details").append($('<option>', {value: data[i].id, text: data[i].name}));
+                }
+                $(".item_details").select2({
+
+                });
+            }
+        });
+    });
+
+</script>
+{% endblock %}

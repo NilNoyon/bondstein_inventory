@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+
+{% block bodyClass %}page-header-fixed page-sidebar-fixed page-horizontal-bar compact-menu{% endblock %}
+
+{% block main %}
+<main class="page-content content-wrap">
+    {% include "navbar.html" %}
+    {% include "sidebar.html" %}
+    <div class="page-inner">
+        {% block content %}{% endblock %}
+        <div class="page-footer" style="padding: 15px 0; background: #fff">
+            <div class="container">
+                <p class="text-center text-uppercase" style="line-height: 1; margin: 0; font-weight: 900"><i>Inventory Management System - © Bondstein Technologies Ltd.</i></p>
+            </div>
+        </div>
+    </div><!-- Page Inner -->
+</main><!-- Page Content -->
+{% endblock %}

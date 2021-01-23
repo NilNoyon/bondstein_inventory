@@ -1,0 +1,499 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}User List{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-lg-3 col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Role List</h4>
+                        <div class="panel-control">
+                            <button type="button" class="btn btn-default btn-addon m-b-sm btn-xs" data-toggle="modal" data-target="#roleModal"><i class="fa fa-plus"></i> Add</button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="display table table-hover" id="roleTable">
+                               <thead>
+                                   <tr>
+                                       <th>Role Name</th>
+                                       <th>Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for role in roles %}
+                                   <tr id="role-{{ role.id }}">
+                                       <th scope="row">{{ role.name }}</td>
+                                       <td scope="row" class="m-h-xs">
+                                           <button type="button" class="btn btn-success btn-xs" id="editRole" data-id="{{ role.id }}"><i class="fa fa-edit"></i></button>
+                                           <button type="button" class="btn btn-google btn-xs" id="deleteRole" data-id="{{ role.id }}"><i class="fa fa-close"></i></button>
+                                       </td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Warehouse List</h4>
+                        <div class="panel-control">
+                            <button type="button" class="btn btn-default btn-addon m-b-sm btn-xs" data-toggle="modal" data-target="#warehouseModal"><i class="fa fa-plus"></i> Add</button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="display table table-hover" id="warehouseTable">
+                               <thead>
+                                   <tr>
+                                       <th>Name</th>
+                                       <th>Address</th>
+                                       <th>Contact</th>
+                                       <th>Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for warehouse in warehouses %}
+                                   <tr id="warehouse-{{ warehouse.id }}">
+                                       <th scope="row">{{ warehouse.name }}</td>
+                                       <th scope="row">{{ warehouse.address }}</td>
+                                       <th scope="row">{{ warehouse.contact }}</td>
+                                       <td scope="row" class="m-h-xs">
+                                           <button type="button" class="btn btn-success btn-xs" id="editWarehouse" data-id="{{ warehouse.id }}"><i class="fa fa-edit"></i></button>
+                                           <button type="button" class="btn btn-google btn-xs" id="deleteWarehouse" data-id="{{ warehouse.id }}"><i class="fa fa-close"></i></button>
+                                       </td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Status List</h4>
+                        <div class="panel-control">
+                            <button type="button" class="btn btn-default btn-addon m-b-sm btn-xs" data-toggle="modal" data-target="#statusModal"><i class="fa fa-plus"></i> Add</button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="display table table-hover" id="statusTable">
+                               <thead>
+                                   <tr>
+                                       <th>Status</th>
+                                       <th>Class</th>
+                                       <th>Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for st in status %}
+                                   <tr id="status-{{ st.id }}">
+                                       <th scope="row">{{ st.name }}</td>
+                                       <th scope="row">{{ st.status_class }}</td>
+                                       <td scope="row" class="m-h-xs">
+                                           <button type="button" class="btn btn-success btn-xs" id="editStatus" data-id="{{ st.id }}"><i class="fa fa-edit"></i></button>
+                                           <button type="button" class="btn btn-google btn-xs" id="deleteStatus" data-id="{{ st.id }}"><i class="fa fa-close"></i></button>
+                                       </td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="roleModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="m-t-md" id="roleForm" action="{% url 'users:add_role' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="role_id">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">User Role Form</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="role_name">Role Name:</label>
+                                    <input name="role_name" type="text" class="form-control" id="role_name" placeholder="Enter User Role Name...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Save Information</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="warehouseModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="m-t-md" id="warehouseForm" action="{% url 'users:add_warehouse' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="warehouse_id">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Warehouse Form</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="name">Warehouse Name:</label>
+                                    <input name="name" type="text" class="form-control" id="warehouse_name" placeholder="Enter Warehouse Name...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="address">Warehouse Address:</label>
+                                    <input name="address" type="text" class="form-control" id="warehouse_address" placeholder="Enter Warehouse Address...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="contact">Warehouse Contact:</label>
+                                    <input name="contact" type="text" class="form-control" id="warehouse_contact" placeholder="Enter Warehouse Contact...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Save Information</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="m-t-md" id="statusForm" action="{% url 'users:add_status' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="status_id">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Status Form</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="status">Status:</label>
+                                    <input name="status" type="text" class="form-control" id="status" placeholder="Enter Status Name..">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="status_class">Status Class:</label>
+                                    <input name="status_class" type="text" class="form-control" id="status_class" placeholder="Enter Status Class...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Save Information</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // $('.role').select2();
+    // $('.warehouse').select2();
+
+    $('#roleTable').DataTable({
+        "lengthMenu": [[4, 10, 25, 50, -1], [4, 10, 25, 50, "All"]],
+        "columnDefs": [{
+            "targets": 1,
+            "orderable": false
+        },
+        {
+            "width": "35%",
+            "targets": 0
+        },
+        {
+            "width": "15%",
+            "targets": 1
+        }]
+    });
+
+    $('#warehouseTable').DataTable({
+        "lengthMenu": [[4, 10, 25, 50, -1], [4, 10, 25, 50, "All"]],
+        "columnDefs": [{
+            "targets": 1,
+            "orderable": false
+        },
+        {
+            "width": "35%",
+            "targets": 0
+        },
+        {
+            "width": "15%",
+            "targets": 1
+        }]
+    });
+
+    $('#statusTable').DataTable({
+    	"lengthMenu": [[4, 10, 25, 50, -1], [4, 10, 25, 50, "All"]],
+        "columnDefs": [{
+            "targets": 1,
+            "orderable": false
+        },
+        {
+            "width": "35%",
+            "targets": 0
+        },
+        {
+            "width": "15%",
+            "targets": 1
+        }]
+    });
+
+    $("#roleTable").on('click', '#editRole', function(){
+        var id = $(this).data('id');
+        $.ajax({
+            url : "{% url 'users:get_role' %}",
+            type : "POST",
+            data : { id : id },
+            success : function(data) {
+                $('#role_id').val(id);
+                $('#role_name').val(data['name']);
+                $("#roleForm").attr('action', '{% url "users:update_role" %}');
+                $("#roleModal").modal();
+            },
+
+            error : function(xhr,errmsg,err) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    showMethod: 'fadeIn',
+                    hideMethod: 'fadeOut',
+                    timeOut: 3500
+                };
+                toastr.error('Oops! We have encountered an error.');
+            }
+        });
+    });
+
+    $("#roleTable").on('click', '#deleteRole', function(){
+        var id = $(this).data('id');
+        if (confirm('are you sure you want to remove this Role?')==true){
+            $.ajax({
+                url : "{% url 'users:delete_role' %}",
+                type : "POST",
+                data : { id : id },
+                success : function(data) {
+                    console.log(data);
+                    $('#role-'+id).hide();
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.success('Role Deleted Successfully');
+                },
+
+                error : function(xhr,errmsg,err) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.error('Oops! We have encountered an error.');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+    $("#warehouseTable").on('click', '#editWarehouse', function(){
+        var id = $(this).data('id');
+        console.log(id);
+        $.ajax({
+            url : "{% url 'users:get_warehouse' %}",
+            type : "POST",
+            data : { id : id },
+            success : function(data) {
+                $('#warehouse_id').val(id);
+                $('#warehouse_name').val(data['name']);
+                $('#warehouse_address').val(data['address']);
+                $('#warehouse_contact').val(data['contact']);
+                $("#warehouseForm").attr('action', '{% url "users:update_warehouse" %}');
+                $("#warehouseModal").modal();
+            },
+
+            error : function(xhr,errmsg,err) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    showMethod: 'fadeIn',
+                    hideMethod: 'fadeOut',
+                    timeOut: 3500
+                };
+                toastr.error('Oops! We have encountered an error.');
+            }
+        });
+    });
+
+    $("#warehouseTable").on('click', '#deleteWarehouse', function(){
+        var id = $(this).data('id');
+        if (confirm('are you sure you want to remove this Warehouse?')==true){
+            $.ajax({
+                url : "{% url 'users:delete_warehouse' %}",
+                type : "POST",
+                data : { id : id },
+                success : function(data) {
+                    console.log(data);
+                    $('#warehouse-'+id).hide();
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.success('Warehouse Deleted Successfully');
+                },
+
+                error : function(xhr,errmsg,err) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.error('Oops! We have encountered an error.');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+    $("#statusTable").on('click', '#editStatus', function(){
+        var id = $(this).data('id');
+        $.ajax({
+            url : "{% url 'users:get_status' %}",
+            type : "POST",
+            data : { id : id },
+            success : function(data) {
+                $('#status_id').val(id);
+                $('#status').val(data['status']);
+                $('#status_class').val(data['status_class']);
+                $("#statusForm").attr('action', '{% url "users:update_status" %}');
+                $("#statusModal").modal();
+            },
+
+            error : function(xhr,errmsg,err) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    showMethod: 'fadeIn',
+                    hideMethod: 'fadeOut',
+                    timeOut: 3500
+                };
+                toastr.error('Oops! We have encountered an error.');
+            }
+        });
+    });
+
+    $("#statusTable").on('click', '#deleteStatus', function(){
+        var id = $(this).data('id');
+        if (confirm('are you sure you want to remove this Status?')==true){
+            $.ajax({
+                url : "{% url 'users:delete_status' %}",
+                type : "POST",
+                data : { id : id },
+                success : function(data) {
+                    console.log(data);
+                    $('#status-'+id).hide();
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.success('Status Deleted Successfully');
+                },
+
+                error : function(xhr,errmsg,err) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.error('Oops! We have encountered an error.');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+    $('#roleModal').on("hidden.bs.modal", function() {
+        $('#role_id').val('');
+        $('#role_name').val('');
+        $("#roleForm").attr('action', '{% url "users:add_role" %}');
+    });
+
+    $('#warehouseModal').on("hidden.bs.modal", function() {
+        $('#warehouse_id').val('');
+        $('#warehouse_name').val('');
+        $('#warehouse_address').val('');
+        $('#warehouse_contact').val('');
+        $("#warehouseForm").attr('action', '{% url "users:add_warehouse" %}');
+    });
+
+    $('#statusModal').on("hidden.bs.modal", function() {
+        $('#status_id').val('');
+        $('#status').val('');
+        $('#status_class').val('');
+        $("#statusForm").attr('action', '{% url "users:add_status" %}');
+    });
+
+</script>
+{% endblock %}

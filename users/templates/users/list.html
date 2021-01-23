@@ -1,0 +1,303 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}User List{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">User List</h4>
+                        <div class="panel-control">
+                            <button type="button" class="btn btn-default btn-addon m-b-sm btn-xs" data-toggle="modal" data-target="#userModal"><i class="fa fa-plus"></i> Add</button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="display table table-hover" id="userTable">
+                               <thead>
+                                   <tr>
+                                       <th>Full Name</th>
+                                   	   <th>Email</th>
+                                       <th>Designation</th>
+                                       <th>Date of Joined</th>
+                                       <th>User Role</th>
+                                       <th>Warehouse</th>
+                                       <th>Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for user in users %}
+                                   <tr id="user-{{ user.id }}">
+                                       <td scope="row">{{ user.fullname }}</td>
+                                       <td>{{ user.email }}</td>
+                                       <td>{{ user.designation|default_if_none:"N/A" }}</td>
+                                       <td>{{ user.date_joined|date:'j F, Y' }}</td>
+                                       <td>{{ user.role.name }}</td>
+                                       <td>{{ user.warehouse.name }}</td>
+                                       <td scope="row" class="m-h-xs">
+                                           <button type="button" class="btn btn-success btn-xs" id="editUser" data-id="{{ user.id }}"><i class="fa fa-edit"></i></button>
+                                           <button type="button" class="btn btn-primary btn-xs" id="resetPass" data-id="{{ user.id }}"><i class="fa fa-unlock"></i></button>
+                                           <button type="button" class="btn btn-google btn-xs" id="deleteUser" data-id="{{ user.id }}"><i class="fa fa-close"></i></button>
+                                       </td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="m-t-md" id="userForm" action="{% url 'users:add' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="user_id">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">User Form</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="username">Username:</label>
+                                    <input name="username" type="text" class="form-control" id="username" placeholder="Enter Username...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="user_email">Email:</label>
+                                    <input name="email" type="text" class="form-control" id="user_email" placeholder="Enter Email...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="fullname">Full Name:</label>
+                                    <input name="fullname" type="text" class="form-control" id="fullname" placeholder="Enter First Name...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="user_warehouse">Warehouse:</label>
+                                    <select class="form-control m-b-sm warehouse" id="user_warehouse" name="warehouse">
+                                        <option value="">Select A Warehouse</option>
+                                        {% for warehouse in warehouses %}
+                                        <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="user_role">User Role:</label>
+                                    <select class="form-control m-b-sm role" id="user_role" name="role">
+                                        <option value="">Select A User Role</option>
+                                        {% for role in roles %}
+                                        <option value="{{ role.id }}">{{ role.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="user_designation">Designation:</label>
+                                    <input name="designation" type="text" class="form-control" id="user_designation" placeholder="Enter Designation...">
+                                </div>
+                            </div>
+                            <!-- <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="user_department">Department:</label>
+                                    <input name="department" type="text" class="form-control" id="user_department" placeholder="Enter Department...">
+                                </div>
+                            </div> -->
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="modal-footer">
+                        <div class="col-md-6 no-p">
+                            <div class="form-group">
+                                <div class="checkbox text-left">
+                                    <label for="user_active" style="padding-left: 0px;">
+                                        <input type="checkbox" name="is_active" id="user_active" value="1"> Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success">Save Information</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // $('.role').select2();
+    // $('.warehouse').select2();
+
+    $("body").on("click", "#user_active", function () {
+        var two = $(this).attr("checked", this.checked);
+        $.uniform.update(two);
+    });
+
+    $('#userTable').DataTable({
+        "lengthMenu": [[4, 10, 25, 50, -1], [4, 10, 25, 50, "All"]],
+        "order": [[0, 'asc']],
+        "columnDefs": [{
+            "targets": 3,
+            "orderable": false
+        }]
+    });
+
+
+    $("#userTable").on('click', '#editUser', function(){
+        var id = $(this).data('id');
+        $.ajax({
+            url : "{% url 'users:get' %}",
+            type : "POST",
+            data : { id : id },
+            success : function(data) {
+                console.log(data['type']);
+                $('#user_id').val(id);
+                $('#username').val(data['username']);
+                $('#fullname').val(data['fullname']);
+                $('#user_email').val(data['email']);
+                $('#user_designation').val(data['designation']);
+                $('#role').val(data['role']).trigger('change');
+                $('#warehouse').val(data['warehouse']).trigger('change');
+                
+                if(data['is_active'] == 1){
+                    $('#user_active').parent().addClass('checked');
+                    $('#user_active').prop('checked', true);
+                }
+                $("#userForm").attr('action', '{% url "users:update" %}');
+                $("#userModal").modal();
+            },
+
+            error : function(xhr,errmsg,err) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    showMethod: 'fadeIn',
+                    hideMethod: 'fadeOut',
+                    timeOut: 3500
+                };
+                toastr.error('Oops! We have encountered an error.');
+            }
+        });
+    });
+
+    $("#userTable").on('click', '#deleteUser', function(){
+        var id = $(this).data('id');
+        if (confirm('are you sure you want to remove this User?')==true){
+            $.ajax({
+                url : "{% url 'users:delete' %}",
+                type : "POST",
+                data : { id : id },
+                success : function(data) {
+                    console.log(data);
+                    $('#user-'+id).hide();
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.success('User Deleted Successfully');
+                },
+
+                error : function(xhr,errmsg,err) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.error('Oops! We have encountered an error.');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+    $("#userTable").on('click', '#resetPass', function(){
+        var id = $(this).data('id');
+        if (confirm('are you sure you want to reset password for this User?')==true){
+            $.ajax({
+                url : "{% url 'users:reset_password' %}",
+                type : "POST",
+                data : { id : id },
+                success : function(data) {
+                    console.log(data);
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.success('User Password Reset Done Successfully');
+                },
+
+                error : function(xhr,errmsg,err) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.error('Oops! We have encountered an error.');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+    $('#userModal').on("hidden.bs.modal", function() {
+        $('#user_id').val('');
+        $('#username').val('');
+        $('#fullname').val('');
+        $('#uaer_warehouse').val('');
+        $('#user_email').val('');
+        $('#user_role').prop("selectedIndex", 0);
+        $('#user_department').val('');
+        $('#user_designation').val('');
+        $('#user_active').parent().removeClass('checked');
+        $('input[name=warehouse').parent().removeClass('selected');
+        $('input[name=role').parent().removeClass('selected');
+        $("#userForm").attr('action', '{% url "users:add" %}');
+    });
+
+</script>
+{% endblock %}

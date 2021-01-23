@@ -1,0 +1,237 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Item List{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Item List</h4>
+                        <div class="panel-control">
+                            <button type="button" class="btn btn-default btn-addon m-b-sm btn-xs" data-toggle="modal" data-target="#itemModal"><i class="fa fa-plus"></i> Add</button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="display table table-hover" id="itemTable">
+                               <thead>
+                                   <tr>
+                                       <th>Item Head</th>
+                                       <th>Name</th>
+                                       <th>Unit</th>
+                                       <th>Unit Price</th>
+                                       <th>Supplier</th>
+                                       <th>Warehouse</th>
+                                       <th>Created At</th>
+                                       <th>Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for item in items %}
+                                   <tr id="item-{{ item.id }}">
+                                       <td scope="row">{{ item.item.name }}</td>
+                                       <td>{{ item.name }}</td>
+                                       <td>{{ item.unit }}</td>
+                                       <td>{{ item.unit_price }}</td>
+                                       <td>{{ item.supplier.name }}</td>
+                                       <td>{{ item.warehouse.name }}</td>
+                                       <td>{{ item.created_at|date:'j F, Y'  }}</td>
+                                       <td scope="row" class="m-h-xs">
+                                           <button type="button" class="btn btn-success btn-xs" id="editItem" data-id="{{ item.id }}"><i class="fa fa-edit"></i></button>
+                                           <button type="button" class="btn btn-google btn-xs" id="deleteItem" data-id="{{ item.id }}"><i class="fa fa-close"></i></button>
+                                       </td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="m-t-md" id="itemForm" action="{% url 'add_item_details' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="item_id">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Item Form</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="name">Name:</label>
+                                    <input name="name" type="text" class="form-control" id="name" placeholder="Enter Product Name..." required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="item">Item Head:</label>
+                                <select class="form-control m-b-sm item" id="item" name="item" required>
+                                    <option value="">Select An Item Head</option>
+                                    {% for item in item_heads %}
+                                    <option value="{{ item.id }}">{{ item.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="unit">Unit:</label>
+                                    <input name="unit" type="text" class="form-control" id="unit" placeholder="Enter Unit" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="unit_price">Unit Price:</label>
+                                    <input name="unit_price" type="number" min="0" class="form-control" id="unit_price" placeholder="Enter Unit Price" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="supplier">Supplier:</label>
+                                <select class="form-control m-b-sm supplier" id="supplier" name="supplier" required>
+                                    <option value="">Select A Supplier</option>
+                                    {% for supplier in suppliers %}
+                                    <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="warehouse">Warehouse:</label>
+                                <select class="form-control m-b-sm warehouse" id="warehouse" name="warehouse" required>
+                                    <option value="">Select A Warehouse</option>
+                                    {% for warehouse in warehouses %}
+                                    <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="modal-footer">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success">Save Information</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // $('.item').select2();
+    // $('.supplier').select2();
+    // $('.warehouse').select2();
+
+    $('#itemTable').DataTable({
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        "order": [[0, 'asc']],
+    });
+
+
+    $("#itemTable").on('click', '#editItem', function(){
+        var id = $(this).data('id');
+        $.ajax({
+            url : "{% url 'get_item_details' %}",
+            type : "POST",
+            data : { id : id },
+            success : function(data) {
+                $('#item_id').val(id);
+                $('#name').val(data['name']);
+                $('#unit').val(data['unit']);
+                $('#unit_price').val(data['unit_price']);
+                $('#item').val(data['item']).trigger('change');
+                $('#supplier').val(data['supplier']).trigger('change');
+                $('#warehouse').val(data['warehouse']).trigger('change');
+                
+                $("#itemForm").attr('action', '{% url "update_item_details" %}');
+                $("#itemModal").modal();
+            },
+
+            error : function(xhr,errmsg,err) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    showMethod: 'fadeIn',
+                    hideMethod: 'fadeOut',
+                    timeOut: 3500
+                };
+                toastr.error('Oops! We have encountered an error.');
+            }
+        });
+    });
+
+    $("#itemTable").on('click', '#deleteItem', function(){
+        var id = $(this).data('id');
+        if (confirm('are you sure you want to remove this Item?')==true){
+            $.ajax({
+                url : "{% url 'delete_item_details' %}",
+                type : "POST",
+                data : { id : id },
+                success : function(data) {
+                    console.log(data);
+                    $('#item-'+id).hide();
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.success('Item Deleted Successfully');
+                },
+
+                error : function(xhr,errmsg,err) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.error('Oops! We have encountered an error.');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+
+    $('#itemModal').on("hidden.bs.modal", function() {
+        $('#item_id').val('');
+        $('#name').val('');
+        $('#unit').val('');
+        $('#unit_price').val('');
+        $('input[name=item').parent().removeClass('selected');
+        $('input[name=supplier').parent().removeClass('selected');
+        $('input[name=warehouse').parent().removeClass('selected');
+        $("#itemForm").attr('action', '{% url "add_item_details" %}');
+    });
+
+</script>
+{% endblock %}

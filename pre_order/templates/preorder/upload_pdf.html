@@ -1,0 +1,117 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Upload PO Form{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Upload PO</h4>
+                        <div class="panel-control">
+                            <a href="{% url 'pre_order_list' %}"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-list"></i> list</button></a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="m-t-sm">
+                            <form class="m-t-md" id="poForm" action="{% url 'save_pdf' %}" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" id="po_id" value="{{ po.id }}">
+                                <div class="row no-m">
+                                    <div class="col-md-12">
+                                        <div class="panel panel-white">
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label for="supplier">Supplier:</label>
+                                                        <select class="form-control m-b-sm supplier" id="supplier" name="supplier" required>
+                                                            <option value="">Select A Supplier</option>
+                                                            {% for supplier in suppliers %}
+                                                            <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="order_date">Order Date:</label>
+                                                            <input name="order_date" type="text" class="form-control date-picker" id="order_date" placeholder="Enter Order Date..." value="{{ po.order_date|date:'Y-m-d' }}" autocomplete="Off">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                           <label for="status">Select Status :</label>
+                                                           <select class="form-control m-b-sm status" name="status">
+                                                                {% for st in status %}
+                                                                <option value="{{ st.id }}" selected>{{ st.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="prepared_by">Prepared By:</label>
+                                                            <input name="prepared_by" type="text" class="form-control" id="quote" placeholder="Enter Username..." value="{{ po.prepared_by }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="checked_by">Checked By</label>
+                                                            <input name="checked_by" type="text" class="form-control" id="checked_by" placeholder="Enter Username..." value="{{ po.checked_by}}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="pdf">Upload PDF</label>
+                                                            <input name="pdf" type="file" class="form-control" id="pdf" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-success btn-block"><h4>Save Information</h4></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // Select2
+    $('.status').select2({placeholder: "Select Status"});
+    $('.supplier').select2({placeholder: "Select Supplier"});
+
+    // DatePicker
+    $('.date-picker').datepicker({
+        orientation: "top auto",
+        autoclose: true,
+        todayBtn: 'linked',
+        format: 'yyyy-mm-dd',
+    });
+</script>
+{% endblock %}
