@@ -1,0 +1,351 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Item Category List{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-lg-4 col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Category List</h4>
+                        <div class="panel-control">
+                            <button type="button" class="btn btn-default btn-addon m-b-sm btn-xs" data-toggle="modal" data-target="#categoryModal"><i class="fa fa-plus"></i> Add</button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="display table table-hover" id="categoryTable">
+                               <thead>
+                                   <tr>
+                                       <th>Name</th>
+                                       <th>Description</th>
+                                       <th>Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for category in item_categories %}
+                                   <tr id="category-{{ category.id }}">
+                                       <td scope="row">{{ category.name }}</td>
+                                       <td>{{ category.description|default_if_none:"N/A" }}</td>
+                                       <td scope="row" class="m-h-xs">
+                                           <button type="button" class="btn btn-success btn-xs" id="editCategory" data-id="{{ category.id }}"><i class="fa fa-edit"></i></button>
+                                           <button type="button" class="btn btn-google btn-xs" id="deleteCategory" data-id="{{ category.id }}"><i class="fa fa-close"></i></button>
+                                       </td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Item Head List</h4>
+                        <div class="panel-control">
+                            <button type="button" class="btn btn-default btn-addon m-b-sm btn-xs" data-toggle="modal" data-target="#itemModal"><i class="fa fa-plus"></i> Add</button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="display table table-hover" id="itemTable">
+                               <thead>
+                                   <tr>
+                                       <th>Name</th>
+                                       <th>Description</th>
+                                       <th>Category</th>
+                                   	   <th>Created At</th>
+                                       <th>Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for item in items %}
+                                   <tr id="item-{{ item.id }}">
+                                       <td scope="row">{{ item.name }}</td>
+                                       <td>{{ item.description|default_if_none:"N/A" }}</td>
+                                       <td>{{ item.category.name}}</td>
+                                       <td>{{ user.created_at|date:'j F, Y' }}</td>
+                                       <td scope="row" class="m-h-xs">
+                                           <button type="button" class="btn btn-success btn-xs" id="editItem" data-id="{{ item.id }}"><i class="fa fa-edit"></i></button>
+                                           <button type="button" class="btn btn-google btn-xs" id="deleteItem" data-id="{{ item.id }}"><i class="fa fa-close"></i></button>
+                                       </td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="m-t-md" id="categoryForm" action="{% url 'add_category' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="category_id">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Category Form</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="name">Name:</label>
+                                    <input name="name" type="text" class="form-control" id="item_name" placeholder="Enter Category Name...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="description">Description:</label>
+                                    <textarea class="form-control" name="description" id="description" placeholder="Enter Description..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="modal-footer">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success">Save Information</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="m-t-md" id="itemForm" action="{% url 'add_item' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="item_id">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Item Form</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="name">Name:</label>
+                                    <input name="name" type="text" class="form-control" id="name" placeholder="Enter Category Name...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="category">Category:</label>
+                                <select class="form-control m-b-sm category" id="category" name="category">
+                                    <option value="">Select A Category</option>
+                                    {% for category in item_categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="description">Description:</label>
+                                    <textarea class="form-control" name="description" id="item_description" placeholder="Enter Description..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="modal-footer">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success">Save Information</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // $('.role').select2();
+    // $('.warehouse').select2();
+
+
+    $('#categoryTable').DataTable({
+        "lengthMenu": [[4, 10, 25, 50, -1], [4, 10, 25, 50, "All"]],
+        "order": [[0, 'asc']],
+    });
+
+    $('#itemTable').DataTable({
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        "order": [[0, 'asc']],
+    });
+
+
+    $("#categoryTable").on('click', '#editCategory', function(){
+        var id = $(this).data('id');
+        $.ajax({
+            url : "{% url 'get_category' %}",
+            type : "POST",
+            data : { id : id },
+            success : function(data) {
+                $('#category_id').val(id);
+                $('#name').val(data['name']);
+                $('#description').val(data['description']);
+                
+                $("#categoryForm").attr('action', '{% url "update_category" %}');
+                $("#categoryModal").modal();
+            },
+
+            error : function(xhr,errmsg,err) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    showMethod: 'fadeIn',
+                    hideMethod: 'fadeOut',
+                    timeOut: 3500
+                };
+                toastr.error('Oops! We have encountered an error.');
+            }
+        });
+    });
+
+    $("#categoryTable").on('click', '#deleteCategory', function(){
+        var id = $(this).data('id');
+        if (confirm('are you sure you want to remove this Category?')==true){
+            $.ajax({
+                url : "{% url 'delete_category' %}",
+                type : "POST",
+                data : { id : id },
+                success : function(data) {
+                    console.log(data);
+                    $('#category-'+id).hide();
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.success('Category Deleted Successfully');
+                },
+
+                error : function(xhr,errmsg,err) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.error('Oops! We have encountered an error.');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+
+    $('#categoryModal').on("hidden.bs.modal", function() {
+        $('#category_id').val('');
+        $('#name').val('');
+        $('#description').val('');
+        $("#categoryForm").attr('action', '{% url "add_category" %}');
+    });
+
+
+    $("#itemTable").on('click', '#editItem', function(){
+        var id = $(this).data('id');
+        $.ajax({
+            url : "{% url 'get_item' %}",
+            type : "POST",
+            data : { id : id },
+            success : function(data) {
+                $('#item_id').val(id);
+                $('#item_name').val(data['name']);
+                $('#category').val(data['category']).trigger('change');
+                $('#item_description').val(data['description']);
+                
+                $("#itemForm").attr('action', '{% url "update_item" %}');
+                $("#itemModal").modal();
+            },
+
+            error : function(xhr,errmsg,err) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    showMethod: 'fadeIn',
+                    hideMethod: 'fadeOut',
+                    timeOut: 3500
+                };
+                toastr.error('Oops! We have encountered an error.');
+            }
+        });
+    });
+
+    $("#itemTable").on('click', '#deleteItem', function(){
+        var id = $(this).data('id');
+        if (confirm('are you sure you want to remove this Item?')==true){
+            $.ajax({
+                url : "{% url 'delete_item' %}",
+                type : "POST",
+                data : { id : id },
+                success : function(data) {
+                    console.log(data);
+                    $('#item-'+id).hide();
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.success('Item Head Deleted Successfully');
+                },
+
+                error : function(xhr,errmsg,err) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.error('Oops! We have encountered an error.');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+
+    $('#itemModal').on("hidden.bs.modal", function() {
+        $('#item_id').val('');
+        $('#item_name').val('');
+        $('input[name=category').parent().removeClass('selected');
+        $('#item_description').val('');
+        $("#itemForm").attr('action', '{% url "add_item" %}');
+    });
+
+</script>
+{% endblock %}

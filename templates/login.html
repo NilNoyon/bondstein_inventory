@@ -80,7 +80,7 @@
                             <div class="login-box">
                                 <a href="#" class="logo-name text-lg text-center">Inventory Management System</a>
                                 <p class="text-center m-t-md">A real-time inventory management system</p>
-                                <form class="m-t-md" action="#" method="post">
+                                <form class="m-t-md" action="{% url 'users:login' %}" method="post">
                                     {% csrf_token %}
                                     <div class="form-group">
                                         <input name="username" type="text" class="form-control" placeholder="Username" required>
@@ -90,7 +90,7 @@
                                     </div>
                                     <button type="submit" class="btn btn-success btn-block">Login</button>
                                 </form>
-                                <p class="text-center m-t-xs text-sm" style="font-weight: 900; font-style: italic"> &copy; Bondstein Technology Ltd.</p>
+                                <p class="text-center m-t-xs text-sm" style="font-weight: 900; font-style: italic"> &copy; Bondstein Technologies Ltd.</p>
                             </div>
                         </div><!-- /card-container -->
                 </div><!-- Main Wrapper -->

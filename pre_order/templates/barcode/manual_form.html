@@ -1,0 +1,147 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Generate Manual Barcode{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+
+<style>
+    .table td {
+        text-align: center;
+        border: 1px solid #000;
+    }
+    th, th *, td, td *{
+        vertical-align: middle !important;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+  <div id="main-wrapper" class="container-fluid p-h-lg">
+    <div class="row">
+      <form id="barcodeForm" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="col-md-2">
+          <div class="panel panel-info">
+            <div class="panel-body">
+              <label for="order">Order</label>
+              <select class="order form-control m-b-sm" id="order" name="order" style="width: 100%;">
+              <option value="" selected>Select PO</option>
+              {% for order in orders %}
+              <option value="{{ order.id }}">{{ order.order_no }}</option>
+              {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="panel panel-info">
+            <div class="panel-body">
+              <label for="item">Item</label>
+              <select class="item form-control m-b-sm" id="item" name="item" style="width: 100%;">
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="panel panel-info">
+            <div class="panel-body">
+              <label for="quantity">Quantity</label>
+              <input type="number" min="1" name="quantity" id="quantity" class="form-control" required>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="panel panel-info">
+            <div class="panel-body">
+              <label for="barcode_excel">Upload Excel File</label>
+              <input type="file" name="barcode_excel" id="barcode_excel" class="form-control" required>
+              <input type="hidden" name="po_details" id="po_details" value="" class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="panel panel-info">
+            <div class="panel-body">
+              <label for="">Sample File<span style="color: red">*</span></label><br>
+              <label><span style="color: red">Plase upload a file as like sample format <a href="{% static 'excel/excel_format.xlsx' %}" download>Download File</a></span></label>
+            </div>
+          </div>
+        </div>
+        <button type="submit" id="generate_btn" class="btn btn-success btn-block" disabled><h4>Generate Barcode</h4></button>
+      </form>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // Select2
+
+    $('#order').select2({placeholder: "Select Order"});
+    $('#item').select2({placeholder: "Select Item"});
+
+    $('#order').on('change',function(){
+        var order = $('#order').val();
+        $("#item ").html("");
+        $.ajax({
+          url : "{% url "ajax_get_order_wise_item" %}",
+          type : "POST",
+          data : { order : order },
+          success: function(data){
+            console.log(data)
+            if(data){
+              $(".item").append($('<option>Select Item - Quantity</option>'));
+              for (var i = 0; i < data.length; i++) {
+                  $(".item").append($('<option>', {value: data[i].id, text: data[i].name + "-" + data[i].quantity}));
+                }
+              $(".item").select2({
+
+                });
+            }else{
+              alert('Cannot find any data for this Order');
+            }
+          },
+          error:function(err){
+            console.log(err)
+          }
+        });
+    });
+
+    $('#item').on('change',function(){
+        var item = $('#item').val();
+        var po_details = $('#po_details').val();
+
+        $.ajax({
+          url : "{% url "ajax_get_quantity" %}",
+          type : "POST",
+          data : { item : item, po_details : po_details},
+          success: function(data){
+            if(data){
+              $('#quantity').val(data['quantity']);
+              $('#generate_btn').attr('disabled',false);
+
+            }else{
+              alert('Item quantity not found!');
+            }
+          },
+          error: function(err){
+          	console.log(err);
+          	alert('Please Select Item!');
+          }
+        });
+    });
+</script>
+{% endblock %}

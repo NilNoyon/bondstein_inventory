@@ -1,0 +1,112 @@
+{% load static %}
+
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Barcode - Inevntory Management System</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link href="{% static 'plugins/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" type="text/css"/>
+    <style type="text/css">
+        @page {
+          size: A4;
+          margin: 5mm;
+        }
+        @media print {
+          body {
+            -webkit-print-color-adjust: exact;
+            font-size: 8px;
+            width: 100%;
+            margin: 0 auto;
+          }
+        }
+
+        @font-face {
+            font-family: 'Code139';
+            src: url('{% static "css/barcode.TTF" %}')  format('truetype');
+        }
+
+        header nav, footer {
+            display: none !important;
+        }
+        .table {
+            width: 31%;
+            max-width: 100%;
+            margin-bottom: 6.85mm;
+            margin-left: 3.5%;
+            float: left;
+        }
+        .table:nth-child(3n+1){margin-left: 0 !important}
+        .table:nth-child(21n-2),
+        .table:nth-child(21n-1),
+        .table:nth-child(21n){margin-bottom: 0 !important}
+        .table:nth-child(21n){page-break-after: always;}
+        .table th,
+        .table td {
+            padding: 2px 5px !important;
+            margin: 2px !important;
+            vertical-align: top;
+        }
+        .table{
+            border: 2px solid #000;
+        }
+        .table tr td,
+        .table > tbody > tr > td{
+            border: 1px solid #333;
+        }
+        .table-empty > tbody > tr > td{
+            border: 2px solid #fff;
+            color: #fff !important;
+            -webkit-print-color: #fff;
+        }
+        .canv {
+            color: #fff;
+            -webkit-print-color-adjust: exact;
+            width: 180px;
+            height: 37px;
+        }
+    </style>
+</head>
+<body>
+
+    {% for bb in barcodes %}
+        <table class="table">
+            <!-- <tr>
+               <td colspan="2"><b>Item Name : {{ bb.po_details.item_details.name }}</b></td>
+            </tr> -->
+            <tr>
+                <td colspan="4" class="text-center">
+                    <canvas class="new_barcode" data-barcode="{{ bb.barcode }}"></canvas>
+                </td>
+            </tr>
+        </table>
+    {% endfor %}
+
+    <script src="{% static 'plugins/jquery/jquery-2.1.4.min.js' %}"></script>
+    <script src="{% static 'js/JsBarcode.js' %}"></script>
+    <script src="{% static 'js/CODE128.js' %}"></script>
+    <script type="text/javascript">
+        $('.new_barcode').each(function(index){
+            var this_barcode = $(this).attr('data-barcode');
+
+            $(this).JsBarcode(this_barcode,{
+                width:  1,
+                height: 20,
+                quite: 1,
+                format: "CODE128",
+                displayValue: true,
+                font:"Monospaced",
+                textAlign:"center",
+                fontSize: 10,
+                fontWeight: "bolder",
+                backgroundColor:"",
+                lineColor:"#000"
+            });
+        });
+
+        window.onload = function() {
+            setTimeout(function () { window.print(); }, 500);
+        }
+    </script>
+</body>
+</html>

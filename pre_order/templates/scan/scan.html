@@ -1,0 +1,170 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Stock In{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<style>
+    td, td *{
+        vertical-align: middle !important;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            Stock In
+                        </h4>
+                        <div class="panel-control">
+                            <span class="text-right">&nbsp; <i class="fa fa-arrow-right"></i> &nbsp; {{ action }}</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <form method="post" class="m-t-lg" action="" id="scanForm">
+                            {% csrf_token %}
+                            <input type="hidden" id="pre_order_details" name="pre_order_details" value="{{ order_details.id }}">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group text-center">
+                                        <input id="Barcode" class="form-control input-lg" type="text" autofocus name="barcode" placeholder="Enter Barcode ...">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-left">
+                                        <h3>
+                                            <span class="text-success" id="scannedBundleCount"></span>
+                                        </h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="text-right">
+                                        <h3>
+                                            <span class="" id="lastBundle"></span>
+                                            <span class="text-danger" id="remainingBundle"></span>
+                                            <span class="text-success" id="scannedBundle">Total Scanned:{{ total_scanned }}</span>&nbsp;&nbsp;
+                                            <span class="text-info" id="totalBundle">Total Product/Item: {{ total_item }}</span>
+                                        </h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="table-responsive m-t-sm">
+                            <form action="{% url 'store_scan_data' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="from_vendor" value="{{ from_vendor }}">
+                            <input type="hidden" name="to_client" value="{{ to_client }}">
+                            <input type="hidden" name="to_technician" value="{{ to_technician }}">
+                            <input type="hidden" name="damage" value="{{ damage }}">
+                            <input type="hidden" name="pre_order_details" value="{{ order_details.id }}">
+                            <input type="hidden" name="stock_qty" value="0">
+                            <input type="hidden" name="action" value="{{ action }}">
+                            <table class="table table-hover table-bordered" id="bcTable">
+                               <thead>
+                                   <tr>
+                                       <th class="text-center">Producte Barcode</th>
+                                       <th class="text-center">Item Name</th>
+                                       <th class="text-center">Unit</th>
+                                       <th class="text-center">Unit Price</th>
+                                       <th class="text-center">Supplier</th>
+                                       <th class="text-center">Warehouse</th>
+                                       <th class="text-center">Stock In Date</th>
+                                       <th style="width: 25px">Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="scanData">
+                               </tbody>
+                            </table>
+                            <button type="submit" class="btn btn-success btn-block" onClick="window.location.reload();"><h4>Save Information</h4></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script>
+    var bcArray = new Array();
+    $('#scanForm').on('submit', function(e){
+
+        e.preventDefault();
+
+        var barcode = $('#Barcode').val();
+        var pre_order_details = $('#pre_order_details').val();
+        var matched = 0;
+
+
+        if(bcArray.length == 0){
+            bcArray.push(barcode);
+            scanReq(barcode, pre_order_details);
+        }else{
+
+            for(var i=0; i<=bcArray.length; i++){
+                if(bcArray[i] == barcode){
+                    matched = 1;
+                }
+            }
+
+            if(matched == 1){
+                alert('Already Scanned!');
+                $('#Barcode').val("");
+            }else{
+                scanReq(barcode, pre_order_details);
+                bcArray.push(barcode);
+            }
+        }
+
+    });
+    var counter = 0;
+    function scanReq(barcode, pre_order_details){
+        $.ajax({
+            url : "{% url "scan_form_bcb" %}",
+            type : "POST",
+            dataType: "JSON",
+            data : { barcode : barcode, pre_order_details: pre_order_details },
+            success : function(response) {
+                console.log(response);
+                if(response['status'] == 'success'){
+                    result = response['bc_data'];
+
+                    $('#scanData').append("<tr><td class='text-center'><input type='hidden' name='barcode' value='"+result['bid']+"'>"+result['barcode']+"</td><td class='text-center'>"+result['item_name']+"</td><td class='text-center'>"+result['unit']+"</td><td class='text-center'>"+result['unit_price']+"</td><td class='text-center'>"+result['supplier']+"</td><td class='text-center'>"+result['warehouse']+"</td><td class='text-center'><input type='hidden' name='stock_in_date' readonly value='"+result['stock_in_date']+"'>"+result['stock_in_date']+"</td><td><button class='btn btn-sm btn-danger dltBC' data-bcb='"+result['barcode']+"'>X</button></td></tr>");
+
+                    $('#Barcode').val("");
+                    counter = counter + 1;
+                    $('#stock_qty').val(counter);
+                    $('#scannedBundleCount').html("Scanned Barcode: "+ counter);
+                }else if(response['status'] == 'Not Found'){
+                    alert(barcode +' - this barcode is not valid barcode');
+                    $('#Barcode').val("");
+                }else if(response['status'] == 'Duplicate Barcode'){
+                    alert(barcode +' - this barcode scanned already');
+                    $('#Barcode').val("");
+                }
+            }
+        });
+    }
+
+
+    $('body').on('click', '.dltBC', function(e){
+        bcArray.pop($(this).data('bcb'));
+        $(this).parent().parent().remove();
+        counter = counter - 1;
+        $('#scannedBundleCount').html(" "+ counter);
+    });
+</script>
+{% endblock %}

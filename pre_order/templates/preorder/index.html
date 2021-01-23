@@ -1,0 +1,126 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}PO list{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">PO List</h4>
+                        <div class="panel-control">
+                            <a href="#"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-plus"></i> Add</button></a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="table table-hover" id="poTable">
+                               <thead>
+                                   <tr>
+                                       <th>Order No.</th>
+                                       <th>Supplier Name</th>
+                                       <th>Supplier Contact</th>
+                                       <th>Order Date</th>
+                                       <th>Order Qty</th>
+                                       <th>Order Grand Total</th>
+                                       <th>Status</th>
+                                       <th>Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for p in preorders %}
+                                   <tr id="po-{{ p.id }}">
+                                       <th scope="row">{{ p.order_no }}</td>
+                                       <th scope="row">{{ p.supplier.name }}</td>
+                                       <th scope="row">{{ p.supplier.contact }}</td>
+                                       <th scope="row">{{ p.order_date|date:'j F, Y' }}</td>
+                                       <th scope="row">{{ p.sum_quantity }}</td>
+                                       <th scope="row">{{ p.sum_amount }}</td>
+                                       <th scope="row">
+                                          {% if p.status.name == 'In Transit' %}
+                                            <button type="button" class="btn btn-danger btn-xs">{{ p.status.name }}</button>
+                                          {% elif p.status.name == 'In Complete' %}
+                                            <button type="button" class="btn btn-warning btn-xs">{{ p.status.name }}</button>
+                                          {% else %}
+                                            <button type="button" class="btn btn-success btn-xs">{{ p.status.name }}</button>
+                                          {% endif %}
+                                       </td>
+                                       <td scope="row" class="m-h-xs">
+                                           <!-- <a href="#"><button class="btn btn-success btn-xs"><i class="fa fa-edit"></i></button></a> -->
+                                           <a href="{% url 'pre_order_details_list' p.id %}"><button class="btn btn-success btn-xs"><i class="fa fa-database"></i></button></a>
+                                           <button type="button" class="btn btn-google btn-xs" id="deletePO" data-id="{{ p.id }}"><i class="fa fa-close"></i></button>
+                                       </td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script>
+
+    $('#poTable').DataTable({
+        "ordering": false,
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        "columnDefs": [{
+            "targets": 1,
+            "orderable": false
+        }]
+    });
+
+
+    $("#poTable").on('click', '#deletePO', function(){
+        var id = $(this).data('id');
+        if (confirm('are you sure you want to remove this PO?')==true){
+            $.ajax({
+                url : "{% url 'delete_po' %}",
+                type : "POST",
+                data : { id : id },
+                success : function(data) {
+                    $('#po-'+id).hide();
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.success('PO Deleted Successfully');
+                },
+
+                error : function(xhr,errmsg,err) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.error('Oops! We have encountered an error.');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+</script>
+{% endblock %}

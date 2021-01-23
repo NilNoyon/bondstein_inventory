@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'users',
+    'pre_order',
+    'inventory',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -78,7 +81,7 @@ WSGI_APPLICATION = 'bondstein_inventory.wsgi.application'
 DATABASES = {
     'default': {
          'ENGINE': 'mysql.connector.django',
-         'NAME': 'bondsteindb',
+         'NAME': 'stockdb',
          'USER': 'root',
          'PASSWORD': 'pass1234',
          'HOST': '127.0.0.1',

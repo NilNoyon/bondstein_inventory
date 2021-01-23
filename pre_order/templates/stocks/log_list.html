@@ -1,0 +1,71 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Stock Log{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Stock Log</h4>
+                        <div class="panel-control">
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="table table-hover" id="stockLogTable">
+                               <thead>
+                                   <tr>
+                                       <th>Item Name</th>
+                                       <th>Total Qty</th>
+                                       <th>Activity</th>
+                                       <th>Created At</th>
+                                       <th>Stock Updated By</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for p in stocks %}
+                                   <tr id="po-{{ p.id }}">
+                                       <td scope="row">{{ p.item.name }}</td>
+                                       <td scope="row">{{ p.quantity }}</td>
+                                       <td scope="row">{{ p.activity|title }}</td>
+                                       <td scope="row">{{ p.created_at|date:'j F, Y' }}</td>
+                                       <td scope="row">{{ p.created_by.fullname }}</td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script>
+
+    $('#stockLogTable').DataTable({
+        "ordering": false,
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        "columnDefs": [{
+            "targets": 1,
+            "orderable": true,
+        }]
+    });
+
+</script>
+{% endblock %}

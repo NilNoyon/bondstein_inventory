@@ -15,8 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+import notifications.urls
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', include('users.urls')),
+    path('pre_order/', include('pre_order.urls')),
+    path('inventory/', include('inventory.urls')),
+
+    path('inbox/notifications/', include(notifications.urls, namespace='notifications')),
 ]
