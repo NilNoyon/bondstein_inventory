@@ -46,6 +46,9 @@ urlpatterns = [
     path('generate-barcode', views.generateBarcode, name='generate_barcode'),
     path('generate-manual-barcode', views.generateManualBarcode, name='generate_manual_barcode'),
     path('scan-barcode', views.scan, name='scan_barcode'),
+    path('barcode-list', views.barcodeList, name='barcode_list'),
+    path('barcode-details/<generate_id>', views.barcodeDetails, name='barcode_details'),
+    path('barcode-pdf/<generate_id>', views.barcodeDetailsPDF, name='barcode_pdf'),
 
     ## stock list..
     path('stock-list', views.stockList, name='stock_list'),

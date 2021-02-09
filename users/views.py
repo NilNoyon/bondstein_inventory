@@ -81,23 +81,6 @@ def error_404_view(request):
 def handler500(request, *args, **argv):
     return redirect('dashboard')
 
-### users settings
-def userSettings(request):
-    if not request.user.is_active:
-        return redirect('users:index')
-    else:
-        if request.user.is_superuser:
-            roles = Role.objects.all()
-            warehouses = Warehouse.objects.all()
-            status = Status.objects.all()
-            users = User.objects.exclude(Q(is_superuser=True)).all()
-            context = {'roles': roles, 'warehouses':warehouses, 'status': status,'users':users}
-            return render(request, "users/list.html", context)
-        else:
-            message = 'You are not authorised!'
-            messages.warning(request, message)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
 def otherSettings(request):
     if not request.user.is_active:
         return redirect('users:index')
@@ -117,6 +100,22 @@ def otherSettings(request):
 #########################
 ## Users Roles
 #########################
+### users settings
+def userSettings(request):
+    if not request.user.is_active:
+        return redirect('users:index')
+    else:
+        if request.user.is_superuser:
+            roles = Role.objects.all()
+            warehouses = Warehouse.objects.all()
+            status = Status.objects.all()
+            users = User.objects.exclude(Q(is_superuser=True)).all()
+            context = {'roles': roles, 'warehouses':warehouses, 'status': status,'users':users}
+            return render(request, "users/list.html", context)
+        else:
+            message = 'You are not authorised!'
+            messages.warning(request, message)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 def addRole(request):
     if not request.user.is_active:

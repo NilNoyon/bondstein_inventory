@@ -62,16 +62,22 @@
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label for="prepared_by">Prepared By:</label>
-                                                            <input name="prepared_by" type="text" class="form-control" id="quote" placeholder="Enter Username..." value="{{ po.prepared_by }}">
-                                                        </div>
+                                                        <label for="prepared_by">Prepared By:</label>
+                                                        <select class="form-control m-b-sm prepared_by" id="prepared_by" name="prepared_by" required>
+                                                            <option value="">Select A Prepared By</option>
+                                                            {% for user in users %}
+                                                            <option value="{{ user.id }}">{{ user.fullname }}</option>
+                                                            {% endfor %}
+                                                        </select>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label for="checked_by">Checked By</label>
-                                                            <input name="checked_by" type="text" class="form-control" id="checked_by" placeholder="Enter Username..." value="{{ po.checked_by}}">
-                                                        </div>
+                                                        <label for="checked_by">Checked By:</label>
+                                                        <select class="form-control m-b-sm checked_by" id="checked_by" name="checked_by" required>
+                                                            <option value="">Select A Checked By</option>
+                                                            {% for user in users %}
+                                                            <option value="{{ user.id }}">{{ user.fullname }}</option>
+                                                            {% endfor %}
+                                                        </select>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
@@ -105,6 +111,8 @@
     // Select2
     $('.status').select2({placeholder: "Select Status"});
     $('.supplier').select2({placeholder: "Select Supplier"});
+    $('.checked_by').select2({placeholder: "Select User"});
+    $('.prepared_by').select2({placeholder: "Select User"});
 
     // DatePicker
     $('.date-picker').datepicker({

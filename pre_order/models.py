@@ -51,8 +51,8 @@ class PreOrder(models.Model):
     status = models.ForeignKey(Status, on_delete=models.CASCADE,null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='pre_order_created_by')
-    prepared_by = models.CharField(max_length = 50, blank=True, null=True)
-    checked_by = models.CharField(max_length = 50, blank=True, null=True)
+    prepared_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='pre_order_prepared_by')
+    checked_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='pre_order_checked_by')
     order_grand_total = models.FloatField(default=0, blank=True, null=True)
     is_deleted = models.BooleanField(default=0)
 
@@ -84,12 +84,13 @@ class PreOrderDetails(models.Model):
 
 class Barcode(models.Model):
 	barcode = models.CharField(max_length=20, blank=True, null=True, unique=True)
-	sku = models.CharField(max_length=8, blank=True, null=True, unique=True)
-	bst = models.CharField(max_length=8, blank=True, null=True, unique=True)
+	sku = models.CharField(max_length=8, blank=True, null=True)
+	bst = models.CharField(max_length=8, blank=True, null=True)
 	po_details = models.ForeignKey(PreOrderDetails, on_delete=models.CASCADE, null=True, blank=True)
 	warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, null=True, blank=True)
 	created_date = models.DateTimeField(auto_now_add=True)
 	created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+	generate_id = models.CharField(max_length=20, blank=True, null=True)
 
 	class Meta:
 		db_table = 'barcodes'

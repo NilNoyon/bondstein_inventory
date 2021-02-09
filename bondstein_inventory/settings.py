@@ -25,7 +25,7 @@ SECRET_KEY = '#iyy5*$gii!et-cq^t^p096wlw@!r3z!51g11sxtw6&ld6opb-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*','HTTP://InvMS.BondsteinTechnologies.Com','HTTPS://InvMS.BondsteinTechnologies.Com']
 
 
 # Application definition
@@ -78,12 +78,26 @@ WSGI_APPLICATION = 'bondstein_inventory.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#          'ENGINE': 'mysql.connector.django',
+#          'NAME': 'stockdb',
+#          'USER': 'root',
+#          'PASSWORD': 'pass1234',
+#          'HOST': '127.0.0.1',
+#          'PORT': '3306',
+#          'OPTIONS': {
+#              'sql_mode': 'traditional',
+#              'autocommit': True,
+#             }
+#         }
+# }
 DATABASES = {
     'default': {
          'ENGINE': 'mysql.connector.django',
-         'NAME': 'stockdb',
-         'USER': 'root',
-         'PASSWORD': 'pass1234',
+         'NAME': 'bondstei_invms',
+         'USER': 'bondstei_invms',
+         'PASSWORD': 'Py#32Inv.',
          'HOST': '127.0.0.1',
          'PORT': '3306',
          'OPTIONS': {
@@ -118,7 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Dhaka'
 
 USE_I18N = True
 

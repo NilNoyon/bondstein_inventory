@@ -1,0 +1,120 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Barcodes{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+<style>
+    .select2-selection{border: none}
+    .select2-container--default .select2-selection--multiple .select2-selection__choice{margin-bottom: 5px;}
+    .table > tbody > tr > td,
+    .table > tbody > tr > th,
+    .table > tfoot > tr > td,
+    .table > tfoot > tr > th,
+    .table > thead > tr > td,
+    .table > thead > tr > th,
+    .table td {
+        padding: 10px !important;
+        font-weight: 700;
+    }
+
+    .table-bordered,
+    .table-bordered>thead,
+    .table-bordered>tbody,
+    .table-bordered>tfoot,
+    .table-bordered>tbody>tr>td,
+    .table-bordered>tbody>tr>th,
+    .table-bordered>tfoot>tr>td,
+    .table-bordered>tfoot>tr>th,
+    .table-bordered>thead>tr>td,
+    .table-bordered>thead>tr>th {
+        border: 2px solid #000;
+    }
+
+    @font-face {
+        font-family: 'Code139';
+        src: url('{% static "css/barcode.TTF" %}')  format('truetype');
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h4 class="panel-title">Barcodes</h4>
+                <div class="panel-control">
+                    <a href="{% url 'barcode_pdf' gid %}" target="_blank"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-print"></i> Print Bundles</button></a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-white">
+                    <div class="panel-body">
+                        <div class="m-t-sm">
+                            <div class="row">
+                                {% for p in barcodes %}
+                                    <div class="col-sm-3">
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                                <tr class="bg-dark light">
+                                                    <td class="text-center" colspan="4"><b>{{ p.po_details.item_details.name|upper }}</b></td>
+                                                </tr>
+                                                
+                                                <tr>
+                                                    <td colspan="4" class="text-center">
+                                                        <canvas class="new_barcode" data-barcode="{{ p.barcode }}"></canvas>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-left" colspan="2"><b>Device ID: {{ p.barcode }}</b></td>
+                                                    <td class="text-right" colspan="2"><b>BST ID: {{ p.bst }}</b></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+    <script src="{% static 'js/jquery-1.7.1.js' %}"></script>
+    <script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+    <script src="{% static 'js/JsBarcode.js' %}"></script>
+    <script src="{% static 'js/CODE128.js' %}"></script>
+    
+    <script type="text/javascript">
+        $('.new_barcode').each(function(index){
+            var this_barcode = $(this).attr('data-barcode');
+            $(this).JsBarcode(this_barcode,{
+                width:  1.1,
+                height: 40,
+                quite: 5,
+                format: "CODE128",
+                displayValue: false,
+                font:"Monospaced",
+                textAlign:"center",
+                fontSize: 15,
+                fontWeight: "bolder",
+                backgroundColor:"",
+                lineColor:"#000"
+            });
+        });
+
+        $.noConflict();
+    </script>
+
+{% endblock %}

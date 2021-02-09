@@ -1,7 +1,7 @@
 {% extends "admin.html" %}
 {% load static %}
 
-{% block title %}Stock In{% endblock %}
+{% block title %}Stock Out{% endblock %}
 
 
 {% block css %}
@@ -21,16 +21,15 @@
                 <div class="panel panel-info">
                     <div class="panel-heading">
                         <h4 class="panel-title">
-                            Stock In
+                            Stock Out
                         </h4>
                         <div class="panel-control">
-                            <span class="text-right">&nbsp; <i class="fa fa-arrow-right"></i> &nbsp; {{ action }}</span>
+                            <span class="text-right">&nbsp; <i class="fa fa-arrow-right"></i> &nbsp; {{ action|upper }}</span>
                         </div>
                     </div>
                     <div class="panel-body">
                         <form method="post" class="m-t-lg" action="" id="scanForm">
                             {% csrf_token %}
-                            <input type="hidden" id="pre_order_details" name="pre_order_details" value="{{ order_details.id }}">
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group text-center">
@@ -46,37 +45,28 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="text-right">
-                                        <h3>
-                                            <span class="" id="lastBundle"></span>
-                                            <span class="text-danger" id="remainingBundle"></span>
-                                            <span class="text-success" id="scannedBundle">Total Stock In: {{ total_scanned }}</span>&nbsp;&nbsp;
-                                            <span class="text-info" id="totalBundle">Total Product/Item: {{ total_item }}</span>
-                                        </h3>
                                     </div>
                                 </div>
                             </div>
                         </form>
 
                         <div class="table-responsive m-t-sm">
-                            <form action="{% url 'store_scan_data' %}" method="post">
+                            <form action="{% url 'store_stockout_data' %}" method="post">
                             {% csrf_token %}
                             <input type="hidden" name="from_vendor" value="{{ from_vendor }}">
                             <input type="hidden" name="to_client" value="{{ to_client }}">
                             <input type="hidden" name="to_technician" value="{{ to_technician }}">
                             <input type="hidden" name="damage" value="{{ damage }}">
-                            <input type="hidden" name="pre_order_details" value="{{ order_details.id }}">
-                            <input type="hidden" name="stock_qty" value="0">
                             <input type="hidden" name="action" value="{{ action }}">
+                            <input type="hidden" name="so_details" id="so_details" value="{{ so_details.id }}">
                             <table class="table table-hover table-bordered" id="bcTable">
                                <thead>
                                    <tr>
                                        <th class="text-center">Product Barcode</th>
                                        <th class="text-center">Item Name</th>
-                                       <th class="text-center">Unit</th>
-                                       <th class="text-center">Unit Price</th>
-                                       <th class="text-center">Supplier</th>
+                                       <th class="text-center">Client</th>
                                        <th class="text-center">Warehouse</th>
-                                       <th class="text-center">Stock In Date</th>
+                                       <th class="text-center">Stock Out Date</th>
                                        <th style="width: 25px">Action</th>
                                    </tr>
                                </thead>
@@ -104,13 +94,12 @@
         e.preventDefault();
 
         var barcode = $('#Barcode').val();
-        var pre_order_details = $('#pre_order_details').val();
+        var challan_details = $('#challan_details').val();
         var matched = 0;
-
 
         if(bcArray.length == 0){
             bcArray.push(barcode);
-            scanReq(barcode, pre_order_details);
+            scanReq(barcode, challan_details);
         }else{
 
             for(var i=0; i<=bcArray.length; i++){
@@ -123,35 +112,38 @@
                 alert('Already Scanned!');
                 $('#Barcode').val("");
             }else{
-                scanReq(barcode, pre_order_details);
+                scanReq(barcode, challan_details);
                 bcArray.push(barcode);
             }
         }
 
     });
     var counter = 0;
-    function scanReq(barcode, pre_order_details){
+    function scanReq(barcode, challan_details){
         $.ajax({
-            url : "{% url "scan_form_bcb" %}",
+            url : "{% url "scan_for_stock_out" %}",
             type : "POST",
             dataType: "JSON",
-            data : { barcode : barcode, pre_order_details: pre_order_details },
+            data : { barcode : barcode, challan_details: challan_details },
             success : function(response) {
                 console.log(response);
-                if(response['status'] == 'success'){
+                if(response['status'] == 'Success'){
                     result = response['bc_data'];
 
-                    $('#scanData').append("<tr><td class='text-center'><input type='hidden' name='barcode' value='"+result['bid']+"'>"+result['barcode']+"</td><td class='text-center'>"+result['item_name']+"</td><td class='text-center'>"+result['unit']+"</td><td class='text-center'>"+result['unit_price']+"</td><td class='text-center'>"+result['supplier']+"</td><td class='text-center'>"+result['warehouse']+"</td><td class='text-center'><input type='hidden' name='stock_in_date' readonly value='"+result['stock_in_date']+"'>"+result['stock_in_date']+"</td><td><button class='btn btn-sm btn-danger dltBC' data-bcb='"+result['barcode']+"'>X</button></td></tr>");
+                    $('#scanData').append("<tr><td class='text-center'><input type='hidden' name='barcode' value='"+result['bid']+"'>"+result['barcode']+"</td><td class='text-center'>"+result['item_name']+"</td><td class='text-center'>"+result['client']+"</td><td class='text-center'>"+result['warehouse']+"</td><td class='text-center'><input type='hidden' name='stock_out_date' readonly value='"+result['stock_out_date']+"'>"+result['stock_out_date']+"</td><td><button class='btn btn-sm btn-danger dltBC' data-bcb='"+result['barcode']+"'>X</button></td></tr>");
 
                     $('#Barcode').val("");
                     counter = counter + 1;
                     $('#stock_qty').val(counter);
                     $('#scannedBundleCount').html("Scanned Barcode: "+ counter);
-                }else if(response['status'] == 'Not Found'){
-                    alert(barcode +' - this barcode is not valid barcode');
+                }else if(response['status'] == 'Failure'){
+                    alert(barcode +' - this item already scanned for a client');
                     $('#Barcode').val("");
-                }else if(response['status'] == 'Duplicate Barcode'){
-                    alert(barcode +' - this barcode scanned already');
+                }else if(response['status'] == 'Not Matched'){
+                    alert(barcode +' - this item not matched with challan');
+                    $('#Barcode').val("");
+                }else if(response['status'] == 'Not Exists'){
+                    alert(barcode +' - this barcode not exists');
                     $('#Barcode').val("");
                 }
             }

@@ -5,121 +5,13 @@
 {% block content %}
     <div id="main-wrapper" class="container-fluid p-h-lg">
         <div class="row">
-            <!-- <div class="col-lg-2 col-md-4">
-                <div class="panel info-box panel-white">
-                    <div class="panel-body">
-                        <div class="info-box-stats">
-                            <p class="counter">17,200</p>
-                            <span class="info-box-title">User activity</span>
-                        </div>
-                        <div class="info-box-icon">
-                            <i class="icon-users"></i>
-                        </div>
-                        <div class="info-box-progress">
-                            <div class="progress progress-xs progress-squared bs-n">
-                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4">
-                <div class="panel info-box panel-white">
-                    <div class="panel-body">
-                        <div class="info-box-stats">
-                            <p class="counter">34,230</p>
-                            <span class="info-box-title">Page views</span>
-                        </div>
-                        <div class="info-box-icon">
-                            <i class="icon-eye"></i>
-                        </div>
-                        <div class="info-box-progress">
-                            <div class="progress progress-xs progress-squared bs-n">
-                                <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4">
-                <div class="panel info-box panel-white">
-                    <div class="panel-body">
-                        <div class="info-box-stats">
-                            <p>$<span class="counter">63,000</span></p>
-                            <span class="info-box-title">Monthly revenue</span>
-                        </div>
-                        <div class="info-box-icon">
-                            <i class="icon-basket"></i>
-                        </div>
-                        <div class="info-box-progress">
-                            <div class="progress progress-xs progress-squared bs-n">
-                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4">
-                <div class="panel info-box panel-white">
-                    <div class="panel-body">
-                        <div class="info-box-stats">
-                            <p class="counter">47,500</p>
-                            <span class="info-box-title">Emails recieved</span>
-                        </div>
-                        <div class="info-box-icon">
-                            <i class="icon-envelope"></i>
-                        </div>
-                        <div class="info-box-progress">
-                            <div class="progress progress-xs progress-squared bs-n">
-                                <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4">
-                <div class="panel info-box panel-white">
-                    <div class="panel-body">
-                        <div class="info-box-stats">
-                            <p>$<span class="counter">53,000</span></p>
-                            <span class="info-box-title">Monthly revenue</span>
-                        </div>
-                        <div class="info-box-icon">
-                            <i class="icon-basket"></i>
-                        </div>
-                        <div class="info-box-progress">
-                            <div class="progress progress-xs progress-squared bs-n">
-                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4">
-                <div class="panel info-box panel-white">
-                    <div class="panel-body">
-                        <div class="info-box-stats">
-                            <p class="counter">47,500</p>
-                            <span class="info-box-title">Emails recieved</span>
-                        </div>
-                        <div class="info-box-icon">
-                            <i class="icon-envelope"></i>
-                        </div>
-                        <div class="info-box-progress">
-                            <div class="progress progress-xs progress-squared bs-n">
-                                <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-        </div><!-- Row -->
+          <div class="col-md-6">
+            <div id="barchart" style="width: 500px; height: 400px;"></div>
+          </div>
+          <div class="col-md-6">
+            <div id="bar_chart" style="width: 500px; height: 400px"></div>
+          </div>
+        </div>
     </div>
 {% endblock %}
 
@@ -135,5 +27,64 @@
         });
 
     });
+</script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+         ['Element', 'Quantity', { role: 'style' }],
+         ['Stock In', 2000, '#b87333'],            // RGB value
+         ['Stock Out', 800, 'silver'],            // English color name
+         ['Damage', 5, 'gold'],
+
+         //['Platinum', 21.45, 'color: #e5e4e2' ], // CSS-style declaration
+      ]);
+
+        var options = {
+          chart: {
+            title: 'Daily Stock Update: ',
+            subtitle: 'Total Quantity Update',
+            titelPosition: 'none',
+          },
+          axes: {
+            x: {
+              // 0: { side: 'bottom', label: 'Output | Target'} // Top x-axis.
+            }
+          },
+          bars: 'horizontal' // Required for Material Bar Charts.
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('barchart'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+</script>
+<script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Year', 'Sales', 'Expenses', 'Profit'],
+          ['2014', 1000, 400, 200],
+          ['2015', 1170, 460, 250],
+          ['2016', 660, 1120, 300],
+          ['2017', 1030, 540, 350]
+        ]);
+
+        var options = {
+          chart: {
+            title: 'Company Performance',
+            subtitle: 'Sales, Expenses, and Profit: 2014-2017',
+          }
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('bar_chart'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
 </script>
 {% endblock %}

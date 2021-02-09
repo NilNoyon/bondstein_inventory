@@ -17,6 +17,7 @@ import xlrd
 from tika import parser
 from django.core.files.storage import FileSystemStorage
 from notifications.signals import notify
+from django.utils.dateformat import DateFormat
 
 # Create your views here.
 @login_required
@@ -26,10 +27,11 @@ def uploadPDF(request):
     else:
         suppliers = Supplier.objects.all()
         status = Status.objects.filter(name__icontains='In Transit')
-
+        users = User.objects.exclude(Q(is_superuser=True)).all()
         context = {
             'suppliers':suppliers,
             'status':status,
+            'users':users,
         }
         return render(request, 'preorder/upload_pdf.html',context)
 
@@ -303,34 +305,41 @@ def deletePO(request):
             messages.warning(request, message)
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-
+## Barcode ###
 def generateBarcode(request):
     if not request.user.is_active:
         return redirect('users:index')
     else:
         if request.method == 'POST':
-            item_details = PreOrderDetails.objects.get(id=request.POST.get('item'))
-            bid = []
-            for i in range(int(request.POST.get('quantity'))):
+            try:
+                item_details = PreOrderDetails.objects.get(id=request.POST.get('item'))
                 counter = Barcode.objects.filter(po_details=item_details.id).count()
-                sku_base = format(item_details.item_details.id+i+1, '04d')
-                bst_base = format(item_details.item_details.item.id+i+1, '04d')
-
-                barcode = str(sku_base) +"-"+str(bst_base)+"-"+str(counter+1)
-                data = {
-                    'barcode':barcode,
-                    'sku':str(sku_base),
-                    'bst':str(bst_base),
-                    'po_details': item_details.id,
-                    'warehouse': item_details.item_details.warehouse.id,
-                    'created_by': request.user.id,
-                }
-                bform = BarcodeForm(data)
-                if bform.is_valid():
-                    bc = bform.save()
-                    bid.append(bc.id)
-            barcodes = Barcode.objects.filter(id__in=bid)
-            return render(request,'barcode/barcode.html',{'barcodes':barcodes})
+                generate_id = str(datetime.datetime.now().date()) +"-"+ str(counter+1)
+                for i in range(int(request.POST.get('quantity'))):
+                    barcode_count = Barcode.objects.all().count()
+                    sku_base = format(counter+i+1, '04d')
+                    bst_base = format(counter+i+1, '04d')
+                    barcode = (DateFormat(datetime.datetime.now())).format('y')+str(format(barcode_count, '06d'))
+                    data = {
+                        'barcode':barcode,
+                        'sku':str(sku_base),
+                        'bst':str(bst_base),
+                        'po_details': item_details.id,
+                        'warehouse': item_details.item_details.warehouse.id,
+                        'created_by': request.user.id,
+                        'generate_id':generate_id,
+                    }
+                    bform = BarcodeForm(data)
+                    if bform.is_valid():
+                        bc = bform.save()
+                    else:
+                        for field in bform:
+                            for error in field.errors:
+                                messages.warning(request, "%s : %s" % (field.name, error))
+                        return redirect('generate_barcode')
+            except Exception as e:
+                print(e)
+            return redirect('barcode_details',generate_id)
         else:
             pre_orders = PreOrder.objects.all()
             item_details = PreOrderDetails.objects.all()
@@ -350,12 +359,13 @@ def generateManualBarcode(request):
             sheet.cell_value(1, 0)
             number_of_rows = sheet.nrows # Extracting number of rows
             codes = []
+            bst = []
             item_details = PreOrderDetails.objects.get(id=request.POST.get('item'))
             quantity = request.POST.get('quantity')
-            bid = []
 
             for row in range(1, number_of_rows):
                 codes.append(int(sheet.cell(row,0).value))
+                bst.append(int(sheet.cell(row,1).value))
 
             if Barcode.objects.filter(barcode__in=codes).exists():
                 message = 'Barcodes are already exist!'
@@ -366,23 +376,75 @@ def generateManualBarcode(request):
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
             else:
-                for i in codes:
-                    counter = Barcode.objects.filter(po_details=item_details.id).count()
-                    data = {
-                        'barcode':i,
-                        'po_details': item_details.id,
-                        'warehouse': item_details.item_details.warehouse.id,
-                        'created_by': request.user.id,
-                    }
-                    bform = BarcodeForm(data)
-                    if bform.is_valid():
-                        bc = bform.save()
-                        bid.append(bc.id)
-            barcodes = Barcode.objects.filter(id__in=bid)
-            return render(request,'barcode/barcode.html',{'barcodes':barcodes})
+                try:
+                    zipped = zip(codes,bst)
+                    generate_id = str(datetime.datetime.now().date()) +"-"+ str(PreOrderDetails.objects.filter(id=request.POST.get('item')).count()+1)
+                    for codes,bst in zipped:
+                        counter = Barcode.objects.filter(po_details=item_details.id).count()
+                        data = {
+                            'barcode':codes,
+                            'po_details': item_details.id,
+                            'warehouse': item_details.item_details.warehouse.id,
+                            'created_by': request.user.id,
+                            'bst':bst,
+                            'generate_id':generate_id,
+                        }
+                        bform = BarcodeForm(data)
+                        if bform.is_valid():
+                            bc = bform.save()
+                except Exception as e:
+                    print(e)
+            return redirect('barcode_details',generate_id)
         else:
             pre_orders = PreOrder.objects.all()
             return render(request,'barcode/manual_form.html',{'orders':pre_orders})
+@login_required
+def barcodeList(request):
+    if not request.user.is_active:
+        return redirect('users:index')
+    else:
+        result = []
+        barcodes = Barcode.objects.all().values_list('generate_id','po_details','po_details__pre_order__order_no','po_details__item_details__name','po_details__item_details__warehouse__name').distinct()
+        print(barcodes)
+        for i in barcodes:
+            total_barcode = Barcode.objects.filter(generate_id=i[0]).count()
+            data = {
+                'generate_id':i[0],
+                'po_details_id':i[1],
+                'order_no':i[2],
+                'item_name':i[3],
+                'warehouse':i[4],
+                'total_barcode':total_barcode,
+            }
+            result.append(data)
+        context = {
+            'results': result,
+            }
+        return render(request, "barcode/list.html", context)
+
+@login_required
+def barcodeDetails(request,generate_id):
+    if not request.user.is_active:
+        return redirect('users:index')
+    else:
+        barcodes = Barcode.objects.filter(generate_id=generate_id)
+        context = {
+            'barcodes': barcodes,
+            'gid':generate_id,
+            }
+        return render(request, "barcode/details.html", context)
+
+@login_required
+def barcodeDetailsPDF(request,generate_id):
+    if not request.user.is_active:
+        return redirect('users:index')
+    else:
+        barcodes = Barcode.objects.filter(generate_id=generate_id)
+        context = {
+            'barcodes': barcodes,
+            }
+        return render(request, "barcode/barcode.html", context)
+## end of barcode
 
 @csrf_exempt
 def getOrderWiseItem(request):
@@ -463,7 +525,7 @@ def stockIn(request, id):
 		order_details = PreOrderDetails.objects.get(id=id)
 		# total_item = order_details.quantity
 		try:
-			total_scanned = ScannedBarcode.objects.get(barcode__po_details=id,from_vendor=True).counter()
+			total_scanned = ScannedBarcode.objects.filter(barcode__po_details_id=id,from_vendor=True).count()
 		except:
 			total_scanned = 0
 		context = {
@@ -575,6 +637,7 @@ def saveScan(request):
             spForm = ScannedBarcodeForm(data)
             if spForm.is_valid():
                 spForm.save()
+                # pass
             else:
                 for field in spForm:
                     for error in field.errors:
@@ -582,11 +645,10 @@ def saveScan(request):
 
         try:
             last_stock_qty = Stock.objects.filter(item=obj.item_details.item.id).last().quantity
-            order_qty = ScannedBarcode.objects.filter(barcode__barcode__po_details=obj.id).count()
-        except:
+            order_qty = ScannedBarcode.objects.filter(barcode__po_details=obj.id).count()
+        except Exception as e:
             last_stock_qty = 0
             order_qty = total_scanned_qty
-
         if last_stock_qty > 0:
             Stock.objects.filter(item=obj.item_details.item.id).update(quantity=last_stock_qty + int(total_scanned_qty))
         else:
