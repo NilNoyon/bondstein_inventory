@@ -1,0 +1,73 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}SO Details list{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Sales Order Details List</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="table table-hover" id="challanDetailsTable">
+                               <thead>
+                                   <tr>
+                                       <th>Item</th>
+                                       <th>Quantity</th>
+                                       <th>Amount</th>
+                                       <th>Remarks</th>
+                                       <th>Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for p in details %}
+                                   <tr id="challan-{{ p.id }}">
+                                       <td scope="row">{{ p.item_details.name }}</td>
+                                       <td scope="row">{{ p.quantity }}</td>
+                                       <td scope="row">{{ p.price }}</td>
+                                       <td scope="row">{{ p.remarks|default:"N/A" }}</td>
+                                       <td scope="row" class="m-h-xs">
+                                            <a href="{% url 'stock_out' p.id %}">
+                                              <button class="btn btn-success btn-xs"><i class="fa fa-barcode"></i></button>
+                                            </a>
+                                       </td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script>
+
+    $('#challanDetailsTable').DataTable({
+        "ordering": false,
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        "columnDefs": [{
+            "targets": 1,
+            "orderable": false
+        }]
+    });
+
+</script>
+{% endblock %}

@@ -44,7 +44,7 @@
                 <ul class="sub-menu">
                     <li><a href="{% url 'generate_barcode' %}">Generate Barcode</a></li>
                     <li><a href="{% url 'generate_manual_barcode' %}">Generate Manual Barcode</a></li>
-                    <!-- <li><a href="{% url 'scan_barcode' %}">Scan Barcode</a></li> -->
+                    <li><a href="{% url 'barcode_list' %}">Barcode List</a></li>
                 </ul>
             </li>
             <li class="droplink">
@@ -66,19 +66,22 @@
                     <span class="arrow"></span>
                 </a>
                 <ul class="sub-menu">
-                    <li><a href="{% url 'client' %}">Clients</a></li>
+                    <li><a href="{% url 'client_list' %}">Clients</a></li>
                 </ul>
             </li>
-            <!-- <li class="droplink">
+            <li class="droplink">
                 <a href="#">
                     <span class="menu-icon icon-grid"></span>
-                    <p>Post Order</p>
+                    <p>Sales Order</p>
                     <span class="arrow"></span>
                 </a>
                 <ul class="sub-menu">
-                    <li><a href="#">Add Challan</a></li>
+                    <li><a href="{% url 'so_list' %}">SO List</a></li>
+                    <li><a href="{% url 'add_so' %}">Add SO</a></li>
+                    <li><a href="{% url 'sto_list' %}">STO List</a></li>
+                    <li><a href="{% url 'add_sto' %}">Add STO</a></li>
                 </ul>
-            </li> -->
+            </li>
             {% if request.user.is_superuser %}
             <li>
                 <a href="#">
