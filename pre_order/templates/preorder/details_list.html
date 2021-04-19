@@ -44,7 +44,7 @@
                                        <td scope="row">{{ p.quantity }}</td>
                                        <td scope="row">{{ p.item_details.unit_price }}</td>
                                        <td scope="row">{{ p.amount }}</td>
-                                       <td scope="row">{{ p.shipping_date }}</td>
+                                       <td scope="row">{{ p.shipping_date|date:'j F, Y'  }}</td>
                                        <td scope="row">
                                         {% if p.status.name == 'In Transit' %}
                                           <button type="button" class="btn btn-danger btn-xs">{{ p.status.name }}</button>

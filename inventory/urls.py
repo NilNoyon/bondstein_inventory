@@ -25,18 +25,22 @@ urlpatterns = [
     # stock transfer warehouse to warehouse...
     path('transfered-item-list', views.STOList, name='sto_list'),
 
-    path('add-transfer-order', views.addSTO, name='add_sto'),
-    # path('get-sales-order', views.getSO, name='get_so'),
+    path('add-sto', views.addSTO, name='add_sto'),
+    path('scan-for-out/<int:id>', views.scanForOut, name='scan_for_out'),
+    path('delete-sto', views.deleteSTO, name='delete_sto'),
     # path('update-sales-order', views.updateSO, name='update_so'),
-    # path('delete-sales-order', views.deleteSO, name='delete_so'),
-    # path('sales-order-details/<int:id>', views.SODetail, name='so_details'),
-    # path('so-detail-list/<int:id>', views.SODetailsList, name='so_detail_list'),
+    path('sto-details/<int:id>', views.STODetail, name='sto_details'),
+    path('sto-detail-list/<int:id>', views.STODetailsList, name='sto_detail_list'),
 
     #stock out...
     path('stock-out/<int:id>', views.stockOut, name='stock_out'),
     path('store-stock-out', views.storeStockOut, name='store_stockout_data'),
 
     path('scan-barcode', views.scanBarcode, name='scan_for_stock_out'),
+    path('scan-barcode-for-sto', views.scanBarcodeForSTO, name='scan_for_sto'), #scan for stock transfer
+    path('store-sto', views.storeSTO, name='store_sto_data'),
+    path('receive-sto', views.receiveSTChallan, name='receive_sto'), #receive stchallan from warehouse to another warehouse
     # ajax method..
     path('get-responible-person',views.getResponsiblePerson, name='get_responsible_person'),
+    path('get-sto-info', views.getSTOInfo, name='get_sto_info'),
 ]

@@ -1,0 +1,216 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Add Floating Item{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Add Floating Item</h4>
+                        <div class="panel-control">
+                            <a href="{% url 'sto_list' %}"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-list"></i> list</button></a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="m-t-sm">
+                            <form class="m-t-md" id="soForm" action="{% url 'add_sto' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" id="sto_id" value="{{ challan_no }}">
+                                <div class="row no-m">
+                                    <div class="col-md-5">
+                                        <div class="panel panel-white">
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="from_warehouse">From Warehouse:</label>
+                                                        {% if request.user.is_superuser %}
+                                                            <select class="form-control m-b-sm client" id="from_warehouse" name="from_warehouse" required>
+                                                                <option value="">Select A Warehouse</option>
+                                                                {% for warehouse in warehouses %}
+                                                                <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        {% else %}
+                                                            <select class="form-control m-b-sm from_warehouse" id="from_warehouse" name="from_warehouse" required>
+                                                                <option value="{{ request.user.warehouse.id }}">{{ request.user.warehouse.name }}</option>
+                                                            </select>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="to_warehouse">To Warehouse</label>
+                                                            <select class="form-control m-b-sm to_warehouse" id="to_warehouse" name="to_warehouse" required>
+                                                                <option value="">Select A Warehouse</option>
+                                                                {% for warehouse in warehouses %}
+                                                                <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="challan_no">Transfer Challan No:</label>
+                                                            <input name="challan_no" type="text" class="form-control" id="challan_no" value="{{ challan_no }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="remarks">Remarks:</label>
+                                                            <input name="remarks" type="text" class="form-control" id="remarks" placeholder="Enter Remarks">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="delivery_person">Delivery Person</label>
+                                                            <input name="delivery_person" type="text" class="form-control" id="delivery_person" value="{{ delivery_person }}">
+                                                        </div>
+                                                    </div>
+                                                
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="panel panel-white">
+                                            <div class="panel-body">
+                                                <div class="row duplicateMe">
+                                                    <div class="col-md-4">
+                                                    	<div class="form-group">
+	                                                        <select class="form-control m-b-sm item_details" id="item_details" name="item_details">
+	                                                            <option value="">Select An Item - (unit price)</option>
+	                                                            {% for item in item_details %}
+	                                                            	<option value="{{ item.id }}">{{ item.name }} - {{ item.unit_price }}</option>
+	                                                            {% endfor %}
+	                                                        </select>
+	                                                    </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <input type="number" class="form-control quantity" name="quantity" placeholder="Quantity">
+                                                        </div>
+                                                    </div>
+                                                    <!-- <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <input type="number" class="form-control price" name="price" placeholder="Price" onkeyup="price_calculation()">
+                                                        </div>
+                                                    </div> -->
+                                                    <div class="col-md-1">
+                                                        <button type="button" class="btn btn-success" style="margin-top: 1px;" id="repeat"><i class="fa fa-plus"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-success btn-block"><h4>Save Information</h4></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // Select2
+    $('.to_warehouse').select2({placeholder: "Select A Warehouse"});
+    $('.from_warehouse').select2({placeholder: "Select A Warehouse"});
+    $('.item_details').select2({placeholder: "Select Item"});
+
+    // DatePicker
+    $('.date-picker').datepicker({
+        orientation: "top auto",
+        autoclose: true,
+        todayBtn: 'linked',
+        startDate: new Date()
+    });
+
+
+
+    // Duplicate Form Data
+    $('body').on('click', '#repeat', function(){
+        $duplicate = $('.duplicateMe');
+
+        $duplicate.find('span').remove();
+
+        var clone = $duplicate.html();
+		$('.duplicateMe').parent().append('<div class="row duplicateMe">'+clone+'</div>');
+		$('.item_details').select2({placeholder: "Select Item ..", width: '100%', width: '100%'});
+        $(this).parent().append('<button type="button" class="btn btn-danger" style="margin-top: 1px;" id="remove"><i class="fa fa-close"></i></button>');
+        $(this).remove();
+        $duplicate.removeClass('duplicateMe');
+    });
+
+    // Remove Form data
+    $('body').on('click', '#remove', function(){
+        $(this).parent().parent().remove();
+    });
+
+    $("#soForm").on('change', '#client', function(){
+        var client = $(this).val();
+        $.ajax({
+            url : "{% url "get_responsible_person" %}",
+            type : "POST",
+            data : { client : client },
+            success : function(data) {
+                // $(".responsible_person").append($('<option>Select Responsible Person</option>'));
+                for (var i = 0; i < data.length; i++) {
+                  $(".responsible_person").append($('<option>', {value: data[i].id, text: data[i].name}));
+                }
+                $(".responsible_person").select2({
+
+                });
+            },
+            error : function(xhr,errmsg,err) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    showMethod: 'fadeIn',
+                    hideMethod: 'fadeOut',
+                    timeOut: 3500
+                };
+            	toastr.error('Oops! We have encountered an error.');
+        	}
+        });
+    });
+
+    function price_calculation() {
+        var price = document.querySelectorAll('.price');
+        var totals = 0;
+
+        //Sum calculation
+        for (var i = 0; i <price.length; i++)
+        {
+          totals = totals + Number(price[i].value);
+        }
+        document.getElementById('so_amount').value = parseInt(totals);
+    }
+
+</script>
+{% endblock %}

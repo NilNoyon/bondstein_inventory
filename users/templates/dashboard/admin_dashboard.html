@@ -6,6 +6,123 @@
 <div id="main-wrapper" class="container-fluid p-h-lg">
     <!-- Row -->
     <div class="row">
+        <div class="col-lg-2 col-md-4">
+            <div class="panel info-box panel-white">
+                <div class="panel-body">
+                    <div class="info-box-stats">
+                        <p class="counter">{{ total_po }}</p>
+                        <span class="info-box-title">Total PO</span>
+                    </div>
+                    <div class="info-box-icon">
+                        <i class="icon-users"></i>
+                    </div>
+                    <div class="info-box-progress">
+                        <div class="progress progress-xs progress-squared bs-n">
+                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4">
+            <div class="panel info-box panel-white">
+                <div class="panel-body">
+                    <div class="info-box-stats">
+                        <p class="counter">{{ total_so }}</p>
+                        <span class="info-box-title">Total SO</span>
+                    </div>
+                    <div class="info-box-icon">
+                        <i class="icon-folder"></i>
+                    </div>
+                    <div class="info-box-progress">
+                        <div class="progress progress-xs progress-squared bs-n">
+                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4">
+            <div class="panel info-box panel-white">
+                <div class="panel-body">
+                    <div class="info-box-stats">
+                        <p class="counter">{{ total_sto }}</p>
+                        <span class="info-box-title">Total STO</span>
+                    </div>
+                    <div class="info-box-icon">
+                        <i class="icon-doc"></i>
+                    </div>
+                    <div class="info-box-progress">
+                        <div class="progress progress-xs progress-squared bs-n">
+                            <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4">
+            <div class="panel info-box panel-white">
+                <div class="panel-body">
+                    <div class="info-box-stats">
+                        <p class="counter">{{ total_item }}</p>
+                        <span class="info-box-title">Total Item</span>
+                    </div>
+                    <div class="info-box-icon">
+                        <i class="fa fa-cubes"></i>
+                    </div>
+                    <div class="info-box-progress">
+                        <div class="progress progress-xs progress-squared bs-n">
+                            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4">
+            <div class="panel info-box panel-white">
+                <div class="panel-body">
+                    <div class="info-box-stats">
+                        <p class="counter">{{ Coms }}</p>
+                        <span class="info-box-title">Total Company</span>
+                    </div>
+                    <div class="info-box-icon">
+                        <i class="fa fa-university"></i>
+                    </div>
+                    <div class="info-box-progress">
+                        <div class="progress progress-xs progress-squared bs-n">
+                            <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4">
+            <div class="panel info-box panel-white">
+                <div class="panel-body">
+                    <div class="info-box-stats">
+                        <p class="counter">{{ total_warehouse }}</p>
+                        <span class="info-box-title">Total Warehouse</span>
+                    </div>
+                    <div class="info-box-icon">
+                        <i class="fa fa-university"></i>
+                    </div>
+                    <div class="info-box-progress">
+                        <div class="progress progress-xs progress-squared bs-n">
+                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Row -->
+    <div class="row">
         <div class="col-lg-4 col-md-12">
             <div class="panel panel-success">
                 <div class="panel-heading">
@@ -20,31 +137,16 @@
                                     <th width="50%">Vendor</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="stockInTable">
+                              {% for cdata in stock_in %}
                                 <tr>
-                                    <th>Today</th>
-                                    <td>6423</td>
+                                    <th>{{ cdata.slug }}</th>
+                                    <td>
+                                        {{ cdata.quantity}}
+                                      
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <th>Last Day</th>
-                                    <td>10245</td>
-                                </tr>
-                                <tr>
-                                    <th>This Week</th>
-                                    <td>27500</td>
-                                </tr>
-                                <tr>
-                                    <th>Last Week</th>
-                                    <td>51955</td>
-                                </tr>
-                                <tr>
-                                    <th>This Month</th>
-                                    <td>89770</td>
-                                </tr>
-                                <tr>
-                                    <th>Last Month</th>
-                                    <td>318773</td>
-                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -66,30 +168,14 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for cdata in stock_out %}
                                 <tr>
-                                    <th>Today</th>
-                                    <td>6423</td>
+                                    <th>{{ cdata.slug }}</th>
+                                    <td>
+                                        {{ cdata.quantity}}
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <th>Last Day</th>
-                                    <td>10245</td>
-                                </tr>
-                                <tr>
-                                    <th>This Week</th>
-                                    <td>27500</td>
-                                </tr>
-                                <tr>
-                                    <th>Last Week</th>
-                                    <td>51955</td>
-                                </tr>
-                                <tr>
-                                    <th>This Month</th>
-                                    <td>89770</td>
-                                </tr>
-                                <tr>
-                                    <th>Last Month</th>
-                                    <td>318773</td>
-                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -111,30 +197,14 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for cdata in stock_out %}
                                 <tr>
-                                    <th>Today</th>
-                                    <td>6423</td>
+                                    <th>{{ cdata.slug }}</th>
+                                    <td>
+                                        {{ cdata.quantity}}
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <th>Last Day</th>
-                                    <td>10245</td>
-                                </tr>
-                                <tr>
-                                    <th>This Week</th>
-                                    <td>27500</td>
-                                </tr>
-                                <tr>
-                                    <th>Last Week</th>
-                                    <td>51955</td>
-                                </tr>
-                                <tr>
-                                    <th>This Month</th>
-                                    <td>89770</td>
-                                </tr>
-                                <tr>
-                                    <th>Last Month</th>
-                                    <td>318773</td>
-                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -142,14 +212,14 @@
             </div>
         </div>
     </div>
-    <div class="row">
+    <!-- <div class="row">
       <div class="col-md-6">
         <div id="barchart" style="width: 500px; height: 400px;"></div>
       </div>
       <div class="col-md-6">
         <div id="bar_chart" style="width: 500px; height: 400px"></div>
       </div>
-    </div>
+    </div> -->
 </div>
 {% endblock %}
 

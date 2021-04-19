@@ -28,11 +28,9 @@
                                    <tr>
                                        <th>SO No.</th>
                                        <th>Client Name</th>
-                                       <th>Client Contact</th>
-                                       <th>Responsible Person</th>
+                                       <th>Delivery Person</th>
                                        <th>SO Date</th>
                                        <th>SO Qty</th>
-                                       <!-- <th>SO Grand Total</th> -->
                                        <th>Status</th>
                                        <th>Action</th>
                                    </tr>
@@ -41,12 +39,10 @@
                                    {% for p in sales_orders %}
                                    <tr id="so-{{ p.id }}">
                                        <th scope="row">{{ p.so_no }}</td>
-                                       <th scope="row">{{ p.client.name }}</td>
-                                       <th scope="row">{{ p.client.contact }}</td>
-                                       <th scope="row">{{ p.responsible_person.name }}</td>
+                                       <th scope="row">{{ p.client }}</td>
+                                       <th scope="row">{{ p.delivery_person|upper }}</td>
                                        <th scope="row">{{ p.so_date|date:'j F, Y' }}</td>
                                        <th scope="row">{{ p.total_qty }}</td>
-                                       <!-- <th scope="row">{{ p.so_amount }}</td> -->
                                        <th scope="row">
                                           {% if p.is_stock_out == False %}
                                             <button type="button" class="btn btn-danger btn-xs">In Transit</button>

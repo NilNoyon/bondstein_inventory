@@ -45,7 +45,7 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="order_no">Order No:</label>
-                                                            <input name="order_no" type="text" class="form-control" id="po_no" placeholder="Enter PO Number..." value="{{ po.po_no }}">
+                                                            <input name="order_no" type="text" class="form-control" id="po_no" placeholder="Enter PO Number..." value="{{ order_no }}" readonly>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -80,16 +80,22 @@
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label for="prepared_by">Prepared By:</label>
-                                                            <input name="prepared_by" type="text" class="form-control" id="quote" placeholder="Enter Username..." value="{{ po.prepared_by }}">
-                                                        </div>
+                                                        <label for="prepared_by">Prepared By:</label>
+                                                        <select class="form-control m-b-sm prepared_by" id="prepared_by" name="prepared_by" required>
+                                                            <option value="">Select A Prepared By</option>
+                                                            {% for user in users %}
+                                                            <option value="{{ user.id }}">{{ user.fullname }}</option>
+                                                            {% endfor %}
+                                                        </select>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label for="checked_by">Checked By</label>
-                                                            <input name="checked_by" type="text" class="form-control" id="checked_by" placeholder="Enter Username..." value="{{ po.checked_by}}">
-                                                        </div>
+                                                        <label for="checked_by">Checked By:</label>
+                                                        <select class="form-control m-b-sm checked_by" id="checked_by" name="checked_by" required>
+                                                            <option value="">Select A Checked By</option>
+                                                            {% for user in users %}
+                                                            <option value="{{ user.id }}">{{ user.fullname }}</option>
+                                                            {% endfor %}
+                                                        </select>
                                                     </div>
                                                 </div>
                                                 <div class="row">
@@ -169,6 +175,8 @@
     $('.supplier').select2({placeholder: "Select Supplier"});
     $('.item').select2({placeholder: "Select Item Head"});
     $('.item_details').select2({placeholder: "Select Item"});
+    $('.checked_by').select2({placeholder: "Select User"});
+    $('.prepared_by').select2({placeholder: "Select User"});
 
     // DatePicker
     $('.date-picker').datepicker({
@@ -183,15 +191,14 @@
     // Duplicate Form Data
     $('body').on('click', '#repeat', function(){
         $duplicate = $('.duplicateMe');
-
         $duplicate.find('span').remove();
-
         var clone = $duplicate.html();
-		$('.duplicateMe').parent().append('<div class="row duplicateMe">'+clone+'</div>');
-
+		$duplicate.parent().append('<div class="row duplicateMe">'+clone+'</div>');
+        $('.item_details').select2({placeholder: "Select Item..", width: '100%', width: '100%'});
+        $duplicate.removeClass('duplicateMe');
         $(this).parent().append('<button type="button" class="btn btn-danger" style="margin-top: 1px;" id="remove"><i class="fa fa-close"></i></button>');
         $(this).remove();
-        $duplicate.removeClass('duplicateMe');
+        
     });
 
     // Remove Form data
@@ -206,10 +213,6 @@
             type : "POST",
             data : { item : item },
             success : function(data) {
-                // $(".item_details").empty().append('<option value=""></option>');
-                // $(".item_details").select2('destroy');
-                // $(".item_details").select2({placeholder: "Select Item", data: data[0], width: '100%'});
-
                 $(".item_details").append($('<option>Select Item</option>'));
                 for (var i = 0; i < data.length; i++) {
                   $(".item_details").append($('<option>', {value: data[i].id, text: data[i].name}));
@@ -220,6 +223,8 @@
             }
         });
     });
+
+    
 
 </script>
 {% endblock %}

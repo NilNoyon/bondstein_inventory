@@ -35,17 +35,12 @@
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <label for="client">Client:</label>
-                                                        <select class="form-control m-b-sm client" id="client" name="client" required>
-                                                            <option value="">Select A Client</option>
-                                                            {% for client in clients %}
-                                                            <option value="{{ client.id }}">{{ client.name }}</option>
-                                                            {% endfor %}
-                                                        </select>
+                                                        <input name="client" type="text" class="form-control" id="client" value="{{ client }}" >
                                                     </div>
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="so_no">Sales Order No:</label>
-                                                            <input name="so_no" type="text" class="form-control" id="so_no" value="{{ so_no }}" readonly>
+                                                            <input name="so_no" type="text" class="form-control" id="so_no" value="{{ so_no }}">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -68,15 +63,13 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="so_date">Sales Order Date:</label>
-                                                            <input name="so_date" type="text" class="form-control date-picker" id="so_date" placeholder="Enter SO Date..." value="{{ sales_order.so_date|date:'m/d/Y' }}" autocomplete="Off">
+                                                            <input name="so_date" type="text" class="form-control date-picker" id="so_date" placeholder="Enter SO Date..." value="{{so_date|date:'m/d/Y'}}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
                                                     	<div class="form-group">
-                                                    		<label for="responsible_person">Responsible Person:</label>
-	                                                        <select class="form-control m-b-sm responsible_person" id="responsible_person" name="responsible_person" required>
-	                                                            <option value="">Select A Responsible Person</option>
-	                                                        </select>
+                                                    		<label for="delivery_person">Delivery Person:</label>
+	                                                        <input type="text" class="form-control m-b-sm delivery_person" id="delivery_person" name="delivery_person" required>
                                                     	</div>
                                                     </div>
                                                 </div>
@@ -164,34 +157,6 @@
     // Remove Form data
     $('body').on('click', '#remove', function(){
         $(this).parent().parent().remove();
-    });
-
-    $("#soForm").on('change', '#client', function(){
-        var client = $(this).val();
-        $.ajax({
-            url : "{% url "get_responsible_person" %}",
-            type : "POST",
-            data : { client : client },
-            success : function(data) {
-                // $(".responsible_person").append($('<option>Select Responsible Person</option>'));
-                for (var i = 0; i < data.length; i++) {
-                  $(".responsible_person").append($('<option>', {value: data[i].id, text: data[i].name}));
-                }
-                $(".responsible_person").select2({
-
-                });
-            },
-            error : function(xhr,errmsg,err) {
-                toastr.options = {
-                    closeButton: true,
-                    progressBar: true,
-                    showMethod: 'fadeIn',
-                    hideMethod: 'fadeOut',
-                    timeOut: 3500
-                };
-            	toastr.error('Oops! We have encountered an error.');
-        	}
-        });
     });
 
     function price_calculation() {

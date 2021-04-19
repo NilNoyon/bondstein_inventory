@@ -94,12 +94,13 @@
         e.preventDefault();
 
         var barcode = $('#Barcode').val();
-        var challan_details = $('#challan_details').val();
+        var so_details = $('#so_details').val();
+        console.log('so_details:',so_details)
         var matched = 0;
 
         if(bcArray.length == 0){
             bcArray.push(barcode);
-            scanReq(barcode, challan_details);
+            scanReq(barcode, so_details);
         }else{
 
             for(var i=0; i<=bcArray.length; i++){
@@ -112,19 +113,19 @@
                 alert('Already Scanned!');
                 $('#Barcode').val("");
             }else{
-                scanReq(barcode, challan_details);
+                scanReq(barcode, so_details);
                 bcArray.push(barcode);
             }
         }
 
     });
     var counter = 0;
-    function scanReq(barcode, challan_details){
+    function scanReq(barcode, so_details){
         $.ajax({
             url : "{% url "scan_for_stock_out" %}",
             type : "POST",
             dataType: "JSON",
-            data : { barcode : barcode, challan_details: challan_details },
+            data : { barcode : barcode, so_details: so_details },
             success : function(response) {
                 console.log(response);
                 if(response['status'] == 'Success'){

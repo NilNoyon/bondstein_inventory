@@ -78,8 +78,30 @@
                 <ul class="sub-menu">
                     <li><a href="{% url 'so_list' %}">SO List</a></li>
                     <li><a href="{% url 'add_so' %}">Add SO</a></li>
+                </ul>
+            </li>
+            <li class="droplink">
+                <a href="#">
+                    <span class="menu-icon icon-grid"></span>
+                    <p>Transfer Item</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
                     <li><a href="{% url 'sto_list' %}">STO List</a></li>
                     <li><a href="{% url 'add_sto' %}">Add STO</a></li>
+                    <li><a href="{% url 'receive_sto' %}">receive STO</a></li>
+                </ul>
+            </li>
+            <li class="droplink">
+                <a href="#">
+                    <span class="menu-icon icon-grid"></span>
+                    <p>Floating Item</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li><a href="{% url 'sto_list' %}">STO List</a></li>
+                    <li><a href="{% url 'add_sto' %}">Add STO</a></li>
+                    <li><a href="{% url 'receive_sto' %}">receive STO</a></li>
                 </ul>
             </li>
             {% if request.user.is_superuser %}

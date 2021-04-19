@@ -106,7 +106,6 @@ def extract_information(file):
         'unit_price':unit_price,
         'grand_total':item_details[-1],
     }
-    pprint.pprint(data)
     response_data.append(data)
     return response_data
 
@@ -141,7 +140,7 @@ def savePDF(request):
                 counter = 0
                 for i in data[0]['item_name']:
                     itm, created = Item.objects.get_or_create(name=i,category_id=1)
-                    itmd, created = ItemDetails.objects.get_or_create(name=i,item=itm,unit_price=data[0]['unit_price'][counter].replace(",",""),warehouse_id=1)
+                    itmd, created = ItemDetails.objects.get_or_create(name=i,item=itm,unit_price=data[0]['unit_price'][counter].replace(",",""),warehouse_id=request.user.warehouse.id)
                     item_details.append(itmd.id)
                     counter += 1
                 qty = data[0]['quantity']
@@ -193,12 +192,18 @@ def add_manual_po(request):
         status = Status.objects.filter(name__icontains='In Transit')
         items = Item.objects.all()
         item_details = ItemDetails.objects.all()
+        today_date = datetime.datetime.now()
+        order = PreOrder.objects.filter(created_at__gte=today_date).count()
+        users = User.objects.exclude(Q(is_superuser=True)).all()
+        order_no = 'BOND-'+today_date.strftime("%d/%m/%Y/")+format(order+1, '02d')
         context = {
             'form':form,
             'suppliers':suppliers,
             'status':status,
             'items':items,
             'item_details':item_details,
+            'users':users,
+            'order_no':order_no
         }
         return render(request, 'preorder/manual_preorder_form.html',context)
 
@@ -207,8 +212,10 @@ def getItemDetailsForItem(request):
     if not request.user.is_authenticated:
         return redirect('index')
     else:
-
-        item_details = ItemDetails.objects.filter(item = request.POST.get('item'))
+        try:
+            item_details = ItemDetails.objects.filter(item = request.POST.get('item'), warehouse_id=request.user.warehouse.id)
+        except:
+            item_details = ItemDetails.objects.filter(item = request.POST.get('item'))
 
         response_data = []
         for i in item_details:
@@ -227,7 +234,7 @@ def preOrderList(request):
 	if not request.user.is_active:
 		return redirect('users:index')
 	else:
-		preorders = PreOrder.objects.filter(is_deleted=False)
+		preorders = PreOrder.objects.filter(is_deleted=False).order_by('-created_at')
 
 		return render(request, 'preorder/index.html',{'preorders':preorders})
 
@@ -236,7 +243,7 @@ def preOrderDetailsList(request,id):
 	if not request.user.is_active:
 		return redirect('users:index')
 	else:
-		pre_order_details = PreOrderDetails.objects.filter(pre_order=id)
+		pre_order_details = PreOrderDetails.objects.filter(pre_order=id).order_by('-created_at')
 		return render(request, 'preorder/details_list.html',{'details':pre_order_details})
 
 @login_required
@@ -405,7 +412,6 @@ def barcodeList(request):
     else:
         result = []
         barcodes = Barcode.objects.all().values_list('generate_id','po_details','po_details__pre_order__order_no','po_details__item_details__name','po_details__item_details__warehouse__name').distinct()
-        print(barcodes)
         for i in barcodes:
             total_barcode = Barcode.objects.filter(generate_id=i[0]).count()
             data = {
@@ -695,7 +701,11 @@ def stockList(request):
     if not request.user.is_active:
         return redirect('users:index')
     else:
-        stocks = Stock.objects.all().order_by('-created_at')
+        if request.user.is_superuser:
+            stocks = Stock.objects.all().order_by('-created_at')
+        else:
+            stocks = ScannedBarcode.objects.filter(barcode__warehouse=request.user.warehouse,from_vendor=1).exclude(to_client=1,to_technician=1,damage=1)
+            stocks = Stock.objects.all().order_by('-created_at')
 
         return render(request,'stocks/list.html',{'stocks':stocks})
 @login_required
@@ -904,7 +914,7 @@ def getCategory(request):
                 response_data = {}
                 response_data['name'] = category.name
                 response_data['description'] = category.description
-                print(response_data)
+                
                 return HttpResponse(
                     json.dumps(response_data),
                     content_type="application/json"
@@ -994,9 +1004,10 @@ def getItem(request):
                 item = Item.objects.get(id=request.POST.get('id'))
                 response_data = {}
                 response_data['name'] = item.name
-                response_data['category'] = item.category
+                response_data['category'] = item.category.name
+                response_data['category_id'] = item.category.id
                 response_data['description'] = item.description
-
+                print(response_data)
                 return HttpResponse(
                     json.dumps(response_data),
                     content_type="application/json"
@@ -1016,7 +1027,10 @@ def updateItem(request):
                 item = Item.objects.get(id=request.POST.get('id'))
                 item.name = request.POST.get('name')
                 item.description = request.POST.get('description')
-                item.category = request.POST.get('description')
+                try:
+                    item.category = ItemCategory.objects.get(id=request.POST.get('category'))
+                except:
+                    pass
                 item.save()
                 message = 'Item Head Updated successfully!'
                 messages.success(request, message)
@@ -1110,7 +1124,7 @@ def getItemDetails(request):
                 response_data['item'] = item.item.id
                 response_data['unit'] = item.unit
                 response_data['unit_price'] = item.unit_price
-                response_data['supplier'] = item.supplier.id
+                response_data['supplier'] = item.supplier.id if item.supplier else ''
                 response_data['warehouse'] = item.warehouse.id
 
                 return HttpResponse(
@@ -1131,18 +1145,18 @@ def updateItemDetails(request):
             if request.method == 'POST':
                 item = ItemDetails.objects.get(id=request.POST.get('id'))
                 item.name = request.POST.get('name').title()
-                item.item = request.POST.get('item')
+                item.item_id = request.POST.get('item')
                 item.unit = request.POST.get('unit')
                 item.unit_price = request.POST.get('unit_price')
-                item.supplier = request.POST.get('supplier')
-                item.warehouse = request.POST.get('warehouse')
+                item.supplier_id = request.POST.get('supplier')
+                item.warehouse_id = request.POST.get('warehouse')
                 item.save()
                 message = 'Item Updated successfully!'
                 messages.success(request, message)
             else:
                 message = 'Method is not allowed!'
                 messages.warning(request, message)
-            return redirect('item_categories')
+            return redirect('items')
         else:
             message = 'You are not authorised!'
             messages.warning(request, message)

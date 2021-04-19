@@ -8,6 +8,8 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('login', views.loginUser, name='login'),
     path('logout', views.logoutUser, name='logout'),
+    path('404', views.error_404_view, name='error_404_view'),
+    path('500', views.handler500, name='handler500'),
 
     # dashboard
     path('dashboard', views.dashboard, name='dashboard'),

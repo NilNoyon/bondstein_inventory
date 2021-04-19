@@ -45,3 +45,8 @@ class STCDetailsForm(forms.ModelForm):
 		super(STCDetailsForm, self).__init__(*args, **kwargs)
 		self.fields['remarks'].required = False
 		self.fields['barcode'].required = False
+
+class STCBarcodeForm(forms.ModelForm):
+	class Meta:
+		model = STCBarcode
+		fields = "__all__"
