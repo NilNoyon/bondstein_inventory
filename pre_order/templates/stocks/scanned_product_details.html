@@ -1,0 +1,65 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Scanned Product Details List{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<style>
+    td, td *{
+        vertical-align: middle !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            Scanned Product Details List
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                            <table class="table table-hover table-bordered" id="bcTable">
+                               <thead>
+                                   <tr>
+                                       <th class="text-center">Product Barcode</th>
+                                       <th class="text-center">Item Name</th>
+                                       <th class="text-center">Unit Price</th>
+                                       <th class="text-center">Supplier</th>
+                                       <th class="text-center">Warehouse</th>
+                                       <th class="text-center">Scanning Date</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                    {% for i in scanned_products %}
+                                        <tr>
+                                            <td class="text-center">{{ i.barcode.barcode }}</td>
+                                            <td class="text-center">{{ i.barcode.po_details.item_details.name }}</td>
+                                            <td class="text-center">{{ i.barcode.po_details.item_details.unit_price }}</td>
+                                            <td class="text-center">{{ i.barcode.po_details.supplier.name|default:"N/A" }}</td>
+                                            <td class="text-center">{{ i.barcode.warehouse.name }}s</td>
+                                            <td class="text-center">{{ i.scanning_date|date:"j-m-Y" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+{% endblock %}

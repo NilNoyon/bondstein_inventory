@@ -10,11 +10,11 @@
             <div class="panel info-box panel-white">
                 <div class="panel-body">
                     <div class="info-box-stats">
-                        <p class="counter">{{ total_po }}</p>
-                        <span class="info-box-title">Total PO</span>
+                        <p><text class="counter">{{ total_po }}</text>/<text class="counter">{{ total_item }}</text></p>
+                        <span class="info-box-title">Total PO/PO Wise Item</span>
                     </div>
                     <div class="info-box-icon">
-                        <i class="icon-users"></i>
+                        <i class="icon-folder"></i>
                     </div>
                     <div class="info-box-progress">
                         <div class="progress progress-xs progress-squared bs-n">
@@ -29,8 +29,8 @@
             <div class="panel info-box panel-white">
                 <div class="panel-body">
                     <div class="info-box-stats">
-                        <p class="counter">{{ total_so }}</p>
-                        <span class="info-box-title">Total SO</span>
+                        <p><text class="counter">{{ total_so }}</text>/<text class="counter">{{ total_so_item }}</text></p>
+                        <span class="info-box-title">Total SO/SO Wise Item</span>
                     </div>
                     <div class="info-box-icon">
                         <i class="icon-folder"></i>
@@ -48,8 +48,27 @@
             <div class="panel info-box panel-white">
                 <div class="panel-body">
                     <div class="info-box-stats">
-                        <p class="counter">{{ total_sto }}</p>
-                        <span class="info-box-title">Total STO</span>
+                        <p><text class="counter">{{ total_sto }}</text>/<text class="counter">{{ total_sto_item }}</text></p>
+                        <span class="info-box-title">Total STO/STO Wise Item</span>
+                    </div>
+                    <div class="info-box-icon">
+                        <i class="icon-doc"></i>
+                    </div>
+                    <div class="info-box-progress">
+                        <div class="progress progress-xs progress-squared bs-n">
+                            <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4">
+            <div class="panel info-box panel-white">
+                <div class="panel-body">
+                    <div class="info-box-stats">
+                        <p><text class="counter">{{ total_fo }}</text>/<text class="counter">{{ total_fo_item }}</text></p>
+                        <span class="info-box-title">Total Floating / Item</span>
                     </div>
                     <div class="info-box-icon">
                         <i class="icon-doc"></i>
@@ -76,25 +95,6 @@
                     <div class="info-box-progress">
                         <div class="progress progress-xs progress-squared bs-n">
                             <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2 col-md-4">
-            <div class="panel info-box panel-white">
-                <div class="panel-body">
-                    <div class="info-box-stats">
-                        <p class="counter">{{ Coms }}</p>
-                        <span class="info-box-title">Total Company</span>
-                    </div>
-                    <div class="info-box-icon">
-                        <i class="fa fa-university"></i>
-                    </div>
-                    <div class="info-box-progress">
-                        <div class="progress progress-xs progress-squared bs-n">
-                            <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                             </div>
                         </div>
                     </div>
@@ -197,7 +197,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for cdata in stock_out %}
+                                {% for cdata in damage %}
                                 <tr>
                                     <th>{{ cdata.slug }}</th>
                                     <td>

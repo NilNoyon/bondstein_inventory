@@ -1,0 +1,159 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Forecast Report{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<style>
+    .table td {
+        text-align: center;
+        border: 1px solid #000;
+        font-weight: 700;
+    }
+    th, th *, td, td *{
+        vertical-align: middle !important;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="panel panel-info">
+              <div class="panel-body">
+                  <select class="form-control m-b-sm" id="item" name="item" style="width: 100%;" multiple>
+                      {% for item in stocks %}
+                      <option value="{{ item.0 }}">{{ item.1 }}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+            </div>
+          </div>
+          {% if warehouses %}
+            <div class="col-md-3">
+              <div class="panel panel-info">
+                <div class="panel-body">
+                    <select class="form-control m-b-sm" id="warehouse" name="warehouse" style="width: 100%;">
+                        {% for w in warehouses %}
+                        <option value="{{ w.id }}">{{ w.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <input type="hidden" id="warehouse" name="warehouse" value="{{ request.user.warehouse_id }}">
+          {% endif %}
+          <div class="col-md-3">
+            <div class="panel panel-info">
+              <div class="panel-body">
+                  <button type="button" class="btn btn-success" id="filterBtn" style="width: 100%"><i class="fa fa-filter"></i> Filter</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Forecast Report</h4>
+                    </div>
+                    <div class="panel-body" id="reportData">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+    $('#item').select2({placeholder: "Select Item"});
+
+    $('#filterBtn').on('click',function(){
+      var items = $('#item').val()
+      var warehouse = $('#warehouse').val()
+      if(items && warehouse){
+        $("#reportData ").html("");
+        $.ajax({
+            url : "{% url "get_forecast_info" %}",
+            type : "POST",
+            data : { items : items, warehouse : warehouse },
+            dataType: 'html',
+            success: function(data){
+              $('#reportData').html(data)
+              
+              $.ajax({
+                url : "{% url "get_forecast_graph_info" %}",
+                type : "POST",
+                data : { items : items, warehouse : warehouse },
+                dataType: 'json',
+                success: function(data){
+                    google.charts.load('current', {'packages':['line']});
+                    google.charts.setOnLoadCallback(drawChart);
+                    var row_data = []
+                    var counter = data['result'].length
+                    function drawChart() {
+                      var data_chart = new google.visualization.DataTable();
+                      data_chart.addColumn('string', 'Month And Year');
+                      for(let i=0; i<data['item_name'].length; i++) {
+                        data_chart.addColumn('number', data['item_name'][i]);
+                      }
+                      for(let i=0; i<data['total'].length; i++) {
+                        // row_data.push(parseInt(i)+1)
+                        row_data.push(data['total'][i])
+                      }
+                      console.log(row_data)
+                      data_chart.addRows(row_data)
+
+                      var options = {
+                        chart: {
+                          title: 'Year Wise Data',
+                        },
+                        width: 700,
+                        height: 500,
+                        axes: {
+                          x: {
+                            0: { side: 'bottom'} // Top x-axis.
+                          }
+                        },
+                      };
+
+                      var chart = new google.charts.Line(document.getElementById('top_x_div'));
+
+                      chart.draw(data_chart, google.charts.Line.convertOptions(options));
+                    }
+                },
+                error: function(err){
+                  console.log(err)
+                },
+              })
+            },
+            error: function(err){
+
+            },
+        });
+        
+      }else{
+        alert('Please select an item')
+      }
+    })
+</script>
+{% endblock %}

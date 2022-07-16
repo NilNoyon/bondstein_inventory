@@ -1,7 +1,7 @@
 {% extends "admin.html" %}
 {% load static %}
 
-{% block title %}Sales Order Details - {{ so.so_no }}{% endblock %}
+{% block title %}Sales Order Details - {{ stc.challan_no }}{% endblock %}
 
 
 {% block css %}
@@ -79,7 +79,7 @@
             <div class="col-md-12">
                 <div class="panel panel-info">
                     <div class="panel-heading">
-                        <h4 class="panel-title">STO</h4>
+                        <h4 class="panel-title">Stock Transfer Challan</h4>
                         <div class="panel-control">
                             <button style="margin-left: 4px" onclick="printFunction()" class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-print"></i> Print </button>
                         </div>

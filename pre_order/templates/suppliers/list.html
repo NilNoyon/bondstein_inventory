@@ -7,6 +7,8 @@
 {% block css %}
 <link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
 <link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+
 {% endblock %}
 
 
@@ -18,7 +20,7 @@
                     <div class="panel-heading">
                         <h4 class="panel-title">Supplier List</h4>
                         <div class="panel-control">
-                            <button type="button" class="btn btn-default btn-addon m-b-sm btn-xs" data-toggle="modal" data-target="#supplierModal"><i class="fa fa-plus"></i> Add</button>
+                            <a href="{% url 'add_supplier' %}"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-plus"></i> Add</button></a>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -28,7 +30,9 @@
                                    <tr>
                                        <th>Name</th>
                                        <th>Contact</th>
+                                       <th>Email</th>
                                        <th>Address</th>
+                                       <th>Item List</th>
                                    	   <th>Created At</th>
                                        <th>Action</th>
                                    </tr>
@@ -39,9 +43,17 @@
                                        <td scope="row">{{ supplier.name }}</td>
                                        <td>{{ supplier.contact }}</td>
                                        <td>{{ supplier.address|default_if_none:"N/A" }}</td>
+                                       <td>{{ supplier.email|default_if_none:"N/A" }}</td>
+                                       <td>
+                                            {% if supplier.item.all %}
+                                                {% for i in supplier.item.all %}
+                                                    {{ i.name|linebreaks }}
+                                                {% endfor %}
+                                            {% endif %}
+                                       </td>
                                        <td>{{ supplier.created_at|date:'j F, Y' }}</td>
                                        <td scope="row" class="m-h-xs">
-                                           <button type="button" class="btn btn-success btn-xs" id="editSupplier" data-id="{{ supplier.id }}"><i class="fa fa-edit"></i></button>
+                                           <a href="{% url 'update_supplier' supplier.id %}"><button class="btn btn-success btn-xs"><i class="fa fa-edit"></i></button></a>
                                            <button type="button" class="btn btn-google btn-xs" id="deleteSupplier" data-id="{{ supplier.id }}"><i class="fa fa-close"></i></button>
                                        </td>
                                    </tr>
@@ -54,53 +66,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal -->
-    <div class="modal fade" id="supplierModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form class="m-t-md" id="supplierForm" action="{% url 'add_supplier' %}" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="id" id="supplier_id">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="myModalLabel">Supplier Form</h4>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="name">Name:</label>
-                                    <input name="name" type="text" class="form-control" id="name" placeholder="Enter Supplier Name...">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="contact">Contact:</label>
-                                    <input name="contact" type="text" class="form-control" id="contact" placeholder="Enter Contact...">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="address">Address:</label>
-                                    <textarea class="form-control" name="address" id="address" placeholder="Enter Address..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="modal-footer">
-                        <div class="col-md-6">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-success">Save Information</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    
 {% endblock %}
 
 
@@ -109,7 +75,7 @@
 <script src="{% static 'plugins/select2/js/select2.js' %}"></script>
 <script>
     // $('.role').select2();
-    // $('.warehouse').select2();
+    // $('#item').select2({placeholder: "Select Item"});
 
 
     $('#supplierTable').DataTable({
@@ -122,35 +88,6 @@
     });
 
 
-    $("#supplierTable").on('click', '#editSupplier', function(){
-        var id = $(this).data('id');
-        $.ajax({
-            url : "{% url 'get_supplier' %}",
-            type : "POST",
-            data : { id : id },
-            success : function(data) {
-                $('#supplier_id').val(id);
-                $('#name').val(data['name']);
-                $('#contact').val(data['contact']);
-                $('#address').val(data['address']);
-                
-                $("#supplierForm").attr('action', '{% url "update_supplier" %}');
-                $("#supplierModal").modal();
-            },
-
-            error : function(xhr,errmsg,err) {
-                toastr.options = {
-                    closeButton: true,
-                    progressBar: true,
-                    showMethod: 'fadeIn',
-                    hideMethod: 'fadeOut',
-                    timeOut: 3500
-                };
-                toastr.error('Oops! We have encountered an error.');
-            }
-        });
-    });
-
     $("#supplierTable").on('click', '#deleteSupplier', function(){
         var id = $(this).data('id');
         if (confirm('are you sure you want to remove this Supplier?')==true){
@@ -159,7 +96,6 @@
                 type : "POST",
                 data : { id : id },
                 success : function(data) {
-                    console.log(data);
                     $('#supplier-'+id).hide();
                     toastr.options = {
                         closeButton: true,
@@ -185,15 +121,6 @@
         } else {
             return false;
         }
-    });
-
-
-    $('#supplierModal').on("hidden.bs.modal", function() {
-        $('#supplier_id').val('');
-        $('#name').val('');
-        $('#contact').val('');
-        $('#address').val('');
-        $("#supplierForm").attr('action', '{% url "add_supplier" %}');
     });
 
 </script>

@@ -12,13 +12,14 @@ import datetime
 import tabula
 import re
 import os
-import pprint
 import xlrd
 from tika import parser
 from django.core.files.storage import FileSystemStorage
 from notifications.signals import notify
 from django.utils.dateformat import DateFormat
-
+import requests
+import pdfplumber
+    
 # Create your views here.
 @login_required
 def uploadPDF(request):
@@ -37,8 +38,13 @@ def uploadPDF(request):
 
 def extract_information(file):
     response_data = []
-    raw = parser.from_file(file)
-    text = str(raw['content'])
+    text = []
+    with pdfplumber.open(file) as pdf:
+        page=pdf.pages[0]
+        text=page.extract_text()
+    # raw = parser.from_file(file)
+    # print(raw)
+    # text = str(raw['content'])
     po = re.search("BONDS/.*", text)
     date = re.search("Date:.*", text)
     quot = re.search("Quot. :.*", text)
@@ -155,7 +161,7 @@ def savePDF(request):
                     data = {
                         'pre_order':frm.id,
                         'item_details':item_details,
-                        'quantity':qty,
+                        'quantity':int(float(qty.replace(",",""))),
                         'amount':amount,
                         'shipping_date':shipping_date,
                         'status':frm.status.id,
@@ -168,6 +174,8 @@ def savePDF(request):
                         for field in pform:
                             for error in field.errors:
                                 messages.warning(request, "%s : %s" % (field.name, error))
+                                print(field.name, error)
+
             else:
                 for field in order_form:
                     for error in field.errors:
@@ -321,12 +329,17 @@ def generateBarcode(request):
             try:
                 item_details = PreOrderDetails.objects.get(id=request.POST.get('item'))
                 counter = Barcode.objects.filter(po_details=item_details.id).count()
-                generate_id = str(datetime.datetime.now().date()) +"-"+ str(counter+1)
+                now = datetime.datetime.now()
+                warehouse = request.user.warehouse_id
+                generate_id = str(now.date())+str(now.hour)+"-"+str(warehouse)
                 for i in range(int(request.POST.get('quantity'))):
-                    barcode_count = Barcode.objects.all().count()
+                    try:
+                        barcode_count = int(Barcode.objects.last().id) + 1
+                    except:
+                        barcode_count = 1
                     sku_base = format(counter+i+1, '04d')
                     bst_base = format(counter+i+1, '04d')
-                    barcode = (DateFormat(datetime.datetime.now())).format('y')+str(format(barcode_count, '06d'))
+                    barcode = (DateFormat(datetime.datetime.now())).format('y')+str(format(barcode_count, '07d'))
                     data = {
                         'barcode':barcode,
                         'sku':str(sku_base),
@@ -357,50 +370,60 @@ def generateManualBarcode(request):
         return redirect('users:index')
     else:
         if request.method == 'POST':
-            file = request.FILES['barcode_excel']
-            fs = FileSystemStorage()
-            xcel = 'B-'+str(datetime.datetime.now().date())+'.xls'
-            filename = fs.save(xcel, file)
-            xl_workbook = xlrd.open_workbook("assets/uploads/%s" % xcel)
-            sheet = xl_workbook.sheet_by_index(0)
-            sheet.cell_value(1, 0)
-            number_of_rows = sheet.nrows # Extracting number of rows
-            codes = []
-            bst = []
-            item_details = PreOrderDetails.objects.get(id=request.POST.get('item'))
-            quantity = request.POST.get('quantity')
+            try:
+                file = request.FILES['barcode_excel']
+                fs = FileSystemStorage()
+                xcel = 'B-'+str(datetime.datetime.now().date())+'.xls'
+                filename = fs.save(xcel, file)
+                xl_workbook = xlrd.open_workbook("assets/uploads/%s" % xcel)
+                sheet = xl_workbook.sheet_by_index(0)
+                sheet.cell_value(1, 0)
+                number_of_rows = sheet.nrows # Extracting number of rows
+                codes = []
+                bst = []
+                item_details = PreOrderDetails.objects.get(id=request.POST.get('item'))
+                quantity = request.POST.get('quantity')
 
-            for row in range(1, number_of_rows):
-                codes.append(int(sheet.cell(row,0).value))
-                bst.append(int(sheet.cell(row,1).value))
+                for row in range(1, number_of_rows):
+                    codes.append(int(sheet.cell(row,0).value))
+                    bst.append(int(sheet.cell(row,1).value))
 
-            if Barcode.objects.filter(barcode__in=codes).exists():
-                message = 'Barcodes are already exist!'
-                messages.warning(request, message)
+                if Barcode.objects.filter(barcode__in=codes).exists():
+                    message = 'Barcodes are already exist!'
+                    messages.warning(request, message)
+                    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+                elif not len(codes) == int(quantity):
+                    message = messages.warning(request, "Quantity:%s and Total Barcode: %s not matched" % (quantity, len(codes)))
+                    messages.warning(request, message)
+                    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+                else:
+                    try:
+                        zipped = zip(codes,bst)
+                        now = datetime.datetime.now()
+                        generate_id = str(now.date())+str(now.hour)+"-"+str(request.user.warehouse_id)
+                        for codes,bst in zipped:
+                            counter = Barcode.objects.filter(po_details=item_details.id).count()
+                            data = {
+                                'barcode':codes,
+                                'po_details': item_details.id,
+                                'warehouse': item_details.item_details.warehouse.id,
+                                'created_by': request.user.id,
+                                'bst':bst,
+                                'generate_id':generate_id,
+                            }
+                            bform = BarcodeForm(data)
+                            if bform.is_valid():
+                                bc = bform.save()
+                            else:
+                                for field in bform:
+                                    for error in field.errors:
+                                        messages.warning(request, 'Due to error : {0}'.format(error))
+                                        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+                    except Exception as e:
+                        print(e)
+            except:
+                messages.warning(request, 'Please check the file format')
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-            elif not len(codes) == int(quantity):
-                message = messages.warning(request, "Quantity:%s and Total Barcode: %s not matched" % (quantity, len(codes)))
-                messages.warning(request, message)
-                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-            else:
-                try:
-                    zipped = zip(codes,bst)
-                    generate_id = str(datetime.datetime.now().date()) +"-"+ str(PreOrderDetails.objects.filter(id=request.POST.get('item')).count()+1)
-                    for codes,bst in zipped:
-                        counter = Barcode.objects.filter(po_details=item_details.id).count()
-                        data = {
-                            'barcode':codes,
-                            'po_details': item_details.id,
-                            'warehouse': item_details.item_details.warehouse.id,
-                            'created_by': request.user.id,
-                            'bst':bst,
-                            'generate_id':generate_id,
-                        }
-                        bform = BarcodeForm(data)
-                        if bform.is_valid():
-                            bc = bform.save()
-                except Exception as e:
-                    print(e)
             return redirect('barcode_details',generate_id)
         else:
             pre_orders = PreOrder.objects.all()
@@ -410,16 +433,28 @@ def barcodeList(request):
     if not request.user.is_active:
         return redirect('users:index')
     else:
+        # comment out portion is old version...
         result = []
-        barcodes = Barcode.objects.all().values_list('generate_id','po_details','po_details__pre_order__order_no','po_details__item_details__name','po_details__item_details__warehouse__name').distinct()
+        if request.user.is_superuser:
+            # barcodes = Barcode.objects.all().values_list('generate_id','po_details','po_details__pre_order__order_no','po_details__item_details__name','warehouse__name').distinct()
+            barcodes = Barcode.objects.all().values_list('po_details','po_details__pre_order__order_no','po_details__item_details__name','warehouse__name','po_details__item_details').order_by('-po_details').distinct()
+        else:
+            # barcodes = Barcode.objects.filter(warehouse=request.user.warehouse).values_list('generate_id','po_details','po_details__pre_order__order_no','po_details__item_details__name','warehouse__name').distinct()
+            barcodes = Barcode.objects.filter(warehouse=request.user.warehouse).values_list('po_details','po_details__pre_order__order_no','po_details__item_details__name','warehouse__name','po_details__item_details').order_by('-po_details').distinct()
         for i in barcodes:
-            total_barcode = Barcode.objects.filter(generate_id=i[0]).count()
+            # total_barcode = Barcode.objects.filter(generate_id=i[0])
+            total_barcode = Barcode.objects.filter(po_details=i[0],po_details__pre_order__order_no=i[1],po_details__item_details=i[4],warehouse__name=i[3])
+            if request.user.is_superuser:
+                total_barcode = total_barcode.count()
+            else:
+                total_barcode = total_barcode.filter(warehouse=request.user.warehouse).count()
             data = {
-                'generate_id':i[0],
-                'po_details_id':i[1],
-                'order_no':i[2],
-                'item_name':i[3],
-                'warehouse':i[4],
+                # 'generate_id':i[0],
+                'po_details_id':i[0],
+                'order_no':i[1],
+                'item_name':i[2],
+                'warehouse':i[3],
+                'item_details':i[4],
                 'total_barcode':total_barcode,
             }
             result.append(data)
@@ -428,28 +463,48 @@ def barcodeList(request):
             }
         return render(request, "barcode/list.html", context)
 
+# @login_required
+# def barcodeDetails(request,generate_id):
+#     if not request.user.is_active:
+#         return redirect('users:index')
+#     else:
+#         barcodes = Barcode.objects.filter(generate_id=generate_id)
+#         context = {
+#             'barcodes': barcodes,
+#             'gid':generate_id,
+#             }
+#         return render(request, "barcode/details.html", context)
 @login_required
-def barcodeDetails(request,generate_id):
+def barcodeDetails(request,po_details,item_name):
     if not request.user.is_active:
         return redirect('users:index')
     else:
-        barcodes = Barcode.objects.filter(generate_id=generate_id)
-        context = {
-            'barcodes': barcodes,
-            'gid':generate_id,
-            }
-        return render(request, "barcode/details.html", context)
+        try:
+            barcodes = Barcode.objects.filter(po_details=po_details,po_details__item_details=item_name)
+            context = {
+                'barcodes': barcodes,
+                'po_details': po_details,
+                'item_name': item_name,
+                }
+            return render(request, "barcode/details.html", context)
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @login_required
-def barcodeDetailsPDF(request,generate_id):
+def barcodeDetailsPDF(request,po_details,item_name):
     if not request.user.is_active:
         return redirect('users:index')
     else:
-        barcodes = Barcode.objects.filter(generate_id=generate_id)
-        context = {
-            'barcodes': barcodes,
-            }
-        return render(request, "barcode/barcode.html", context)
+        try:
+            barcodes = Barcode.objects.filter(po_details=po_details,po_details__item_details=item_name)
+            context = {
+                'barcodes': barcodes,
+                }
+            return render(request, "barcode/barcode.html", context)
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 ## end of barcode
 
 @csrf_exempt
@@ -633,12 +688,12 @@ def saveScan(request):
         zipped = zip(barcode, scanning_date)
         for barcode, scanning_date in zipped:
             data = {
-            'barcode':barcode,
-            'scanning_date':datetime.datetime.strptime(scanning_date, '%Y-%m-%d'),
-            'from_vendor':from_vendor,
-            'to_client':to_client,
-            'to_technician':to_technician,
-            'damage':damage,
+                'barcode':barcode,
+                'scanning_date':scanning_date,
+                'from_vendor':from_vendor,
+                'to_client':to_client,
+                'to_technician':to_technician,
+                'damage':damage,
             }
             spForm = ScannedBarcodeForm(data)
             if spForm.is_valid():
@@ -650,18 +705,19 @@ def saveScan(request):
                         messages.warning(request, "%s : %s" % (field.name, error))
 
         try:
-            last_stock_qty = Stock.objects.filter(item=obj.item_details.item.id).last().quantity
-            order_qty = ScannedBarcode.objects.filter(barcode__po_details=obj.id).count()
+            last_stock_qty = Stock.objects.filter(item=obj.item_details.item.id,warehouse=request.user.warehouse).last().quantity
+            order_qty = ScannedBarcode.objects.filter(barcode__po_details_id=obj.pre_order_id).count()
         except Exception as e:
             last_stock_qty = 0
-            order_qty = total_scanned_qty
+            order_qty = ScannedBarcode.objects.filter(barcode__po_details_id=obj.pre_order_id).count()
         if last_stock_qty > 0:
-            Stock.objects.filter(item=obj.item_details.item.id).update(quantity=last_stock_qty + int(total_scanned_qty))
+            Stock.objects.filter(item=obj.item_details.item.id,warehouse=request.user.warehouse).update(quantity=last_stock_qty + int(total_scanned_qty))
         else:
             data = {
                 'item': obj.item_details.item.id,
                 'quantity': last_stock_qty + int(total_scanned_qty),
                 'updated_by': request.user.id,
+                'warehouse': request.user.warehouse,
             }
             sform = StockForm(data)
             if sform.is_valid():
@@ -701,13 +757,22 @@ def stockList(request):
     if not request.user.is_active:
         return redirect('users:index')
     else:
+        stock_data = []
         if request.user.is_superuser:
-            stocks = Stock.objects.all().order_by('-created_at')
+            stocks = Stock.objects.all().values_list('item','item__name').distinct()
+            for i in stocks:
+                s = Stock.objects.filter(item=i[0])
+                qty = sum([i.quantity for i in s])
+                data = {
+                    'item_name': i[1],
+                    'qty': qty,
+                    'updated_at':s.last().updated_at.date(),
+                }
+                stock_data.append(data)
         else:
-            stocks = ScannedBarcode.objects.filter(barcode__warehouse=request.user.warehouse,from_vendor=1).exclude(to_client=1,to_technician=1,damage=1)
-            stocks = Stock.objects.all().order_by('-created_at')
+            stocks = Stock.objects.filter(warehouse=request.user.warehouse).order_by('-created_at')
 
-        return render(request,'stocks/list.html',{'stocks':stocks})
+        return render(request,'stocks/list.html',{'stocks':stocks,'stock_data':stock_data})
 @login_required
 def stockLog(request):
     if not request.user.is_active:
@@ -722,22 +787,63 @@ def scannedProductList(request):
         return redirect('users:index')
     else:
         if request.user.is_superuser:
-            scanned_products = ScannedBarcode.objects.all().values_list('barcode__po_details__pre_order__order_no','barcode__po_details__item_details__name').distinct()
+            scanned_products = ScannedBarcode.objects.all().values_list('barcode__po_details__pre_order__order_no','barcode__po_details__item_details__name','barcode__po_details__pre_order','barcode__po_details__item_details').distinct()
         else:
-            scanned_products = ScannedBarcode.objects.all().values_list('barcode__po_details__pre_order__order_no','barcode__po_details__item_details__name').distinct()
+            scanned_products = ScannedBarcode.objects.filter(barcode__warehouse=request.user.warehouse).values_list('barcode__po_details__pre_order__order_no','barcode__po_details__item_details__name','barcode__po_details__pre_order','barcode__po_details__item_details').distinct()
         data = []
         for i in scanned_products:
+            if request.user.is_superuser:
+                total_scanned = ScannedBarcode.objects.filter(from_vendor=True,barcode__po_details__pre_order=i[2],barcode__po_details__item_details=i[3]).count()
+            else:
+                total_scanned = ScannedBarcode.objects.filter(from_vendor=True,barcode__warehouse=request.user.warehouse,barcode__po_details__pre_order=i[2],barcode__po_details__item_details=i[3]).count()
             result = {
                 'order_no':i[0],
                 'item_name':i[1],
-                'total_scanned':ScannedBarcode.objects.filter(barcode__po_details__pre_order__order_no=i[0],barcode__po_details__item_details__name=i[1]).count(),
+                'order':i[2],
+                'item':i[3],
+                'total_scanned':total_scanned,
             }
             data.append(result)
 
-        pprint.pprint(data)
+        
         return render(request,'stocks/scanned_product.html',{'scanned_products':data})
 
+@login_required
+def scannedProductDetailList(request,order_no,item_name):
+    if not request.user.is_active:
+        return redirect('users:index')
+    else:
+        if request.user.is_superuser:
+            scanned_products = ScannedBarcode.objects.filter(from_vendor=True,barcode__po_details__pre_order=order_no,barcode__po_details__item_details=item_name)        
+        else:
+            scanned_products = ScannedBarcode.objects.filter(from_vendor=True,barcode__po_details__pre_order=order_no,barcode__po_details__item_details=item_name,barcode__warehouse=request.user.warehouse)        
+        if scanned_products.count() == 0:
+            message = 'Data Not found'
+            messages.warning(request,message)
+        return render(request,'stocks/scanned_product_details.html',{'scanned_products':scanned_products})
 
+
+@login_required
+def scannedItemBarcode(request):
+    if not request.user.is_active:
+        return redirect('users:index')
+    else:
+        stock_data = []
+        if request.user.is_superuser:
+            stocks = Stock.objects.all().values_list('item','item__name').distinct()
+        else:
+            stocks = Stock.objects.filter(warehouse=request.user.warehouse).values_list('item','item__name')
+        return render(request, 'stocks/item_wise_scanned.html',{'stocks':stocks})
+
+@csrf_exempt
+def getScannedItemBarcode(request):
+    item = request.POST.get('item')
+    if item:
+        if request.user.is_superuser:
+            scanned_products = ScannedBarcode.objects.filter(from_vendor=True,barcode__po_details__item_details__item=item).order_by('-id')
+        else:
+            scanned_products = ScannedBarcode.objects.filter(from_vendor=True,barcode__po_details__item_details__item=item,barcode__warehouse=request.user.warehouse).order_by('-id')
+        return render(request, 'stocks/item_wise_scanned_info.html',{'stock_infos':scanned_products})
 #########################
 ## Suppliers
 #########################
@@ -757,7 +863,7 @@ def addSupplier(request):
         if request.user.is_active:
             if request.method == 'POST':
                 request.POST = request.POST.copy()
-
+                request.POST['added_by'] = request.user.id
                 form = SupplierForm(request.POST)
                 if form.is_valid():
                     form.save()
@@ -768,8 +874,14 @@ def addSupplier(request):
                         for error in field.errors:
                             messages.warning(request, "%s : %s" % (field.name, error))
             else:
-                message = 'Method is not allowed!'
-                messages.warning(request, message)
+                items = Item.objects.all()
+                action = "/pre_order/add-supplier"
+                context = {
+                    'action': action,
+                    'items': items,
+                    'query_action': 'Add'
+                }
+                return render(request, 'suppliers/form.html',context)
             return redirect('supplier_list')
         else:
             message = 'You are not authorised!'
@@ -820,22 +932,33 @@ def getSupplier(request):
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @csrf_exempt
-def updateSupplier(request):
+def updateSupplier(request,id):
     if not request.user.is_active:
         return redirect('users:index')
     else:
         if request.user.is_active:
             if request.method == 'POST':
-                supplier = Supplier.objects.get(id=request.POST.get('id'))
+                supplier = Supplier.objects.get(id=id)
                 supplier.name = request.POST.get('name')
                 supplier.contact = request.POST.get('contact')
+                supplier.email = request.POST.get('email')
                 supplier.address = request.POST.get('address')
                 supplier.save()
+                items = request.POST.getlist('item')
+                supplier.item.set(items)
                 message = 'Supplier Updated successfully!'
                 messages.success(request, message)
             else:
-                message = 'Method is not allowed!'
-                messages.warning(request, message)
+                supplier = Supplier.objects.get(id=id)
+                items = Item.objects.all()
+                action = "/pre_order/update-supplier/"+str(id)
+                context = {
+                    'action': action,
+                    'items': items,
+                    'query_action': 'Update',
+                    'supplier': supplier,
+                }
+                return render(request, 'suppliers/form.html',context)
             return redirect('supplier_list')
         else:
             message = 'You are not authorised!'
@@ -1007,7 +1130,6 @@ def getItem(request):
                 response_data['category'] = item.category.name
                 response_data['category_id'] = item.category.id
                 response_data['description'] = item.description
-                print(response_data)
                 return HttpResponse(
                     json.dumps(response_data),
                     content_type="application/json"
@@ -1054,7 +1176,7 @@ def itemList(request):
         item_heads = Item.objects.all()
         items = ItemDetails.objects.all()
         suppliers = Supplier.objects.all()
-        warehouses = Warehouse.objects.all()
+        warehouses = Warehouse.objects.exclude(name__icontains='float')
         context = {
             'items': items,
             'item_heads':item_heads,

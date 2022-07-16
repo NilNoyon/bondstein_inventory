@@ -32,6 +32,16 @@ urlpatterns = [
     path('sto-details/<int:id>', views.STODetail, name='sto_details'),
     path('sto-detail-list/<int:id>', views.STODetailsList, name='sto_detail_list'),
 
+    # Floating sales...
+    path('floating-item-list', views.FIList, name='fi_list'),
+
+    path('add-fo', views.addFO, name='add_fo'),
+    # path('scan-for-out/<int:id>', views.scanForOut, name='scan_for_out'),
+    path('delete-fo', views.deleteFO, name='delete_fo'),
+    path('fo-details/<int:id>', views.FODetail, name='fo_details'),
+    path('generate_so/<int:id>', views.generateSO, name='generate_so'),
+    path('re-stock/<int:id>', views.reStock, name='re_stock'),
+
     #stock out...
     path('stock-out/<int:id>', views.stockOut, name='stock_out'),
     path('store-stock-out', views.storeStockOut, name='store_stockout_data'),
@@ -40,7 +50,24 @@ urlpatterns = [
     path('scan-barcode-for-sto', views.scanBarcodeForSTO, name='scan_for_sto'), #scan for stock transfer
     path('store-sto', views.storeSTO, name='store_sto_data'),
     path('receive-sto', views.receiveSTChallan, name='receive_sto'), #receive stchallan from warehouse to another warehouse
+    path('scan-barcode-for-fo', views.scanBarcodeForFO, name='scan_for_floating'), # scan bundle card for floating..
     # ajax method..
     path('get-responible-person',views.getResponsiblePerson, name='get_responsible_person'),
     path('get-sto-info', views.getSTOInfo, name='get_sto_info'),
+
+    # Reports Url...
+    path('daily-inventory-report', views.dailyInventoryReport, name='daily_inventory_report'),
+    path('get-daily-inventory-report', views.getDailyInventoryReport, name='get_daily_inventory_report'),
+    path('export-daily-inventory-report/<from_date>/<to_date>/<warehouse>/', views.exportDailyInventoryReport, name='export_daily_inventory_report'),
+
+    path('monthly-inventory-report', views.monthlyInventoryReport, name='monthly_inventory_report'),
+    path('get-monthly-inventory-report', views.getMonthlyInventoryReport, name='get_monthly_inventory_report'),
+    path('export-monthly-inventory-report/<month>/<year>/<warehouse>/', views.exportMonthlyInventoryReport, name='export_monthly_inventory_report'),
+
+    path('forecast-report', views.forecastReport, name='forecast_report'),
+    path('forecast-report-info', views.forecastReportInfo, name='get_forecast_info'),
+    path('forecast-report-graph-info', views.forecastReportGraphInfo, name='get_forecast_graph_info'),
+
+    path('channel-demand/add', views.channelDemandAdd, name='add_channel_demand'),
+    path('channel-demand/save', views.save_channel_demand, name='save_channel_demand'),
 ]

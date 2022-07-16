@@ -106,12 +106,16 @@
         var barcode = $('#Barcode').val();
         var pre_order_details = $('#pre_order_details').val();
         var matched = 0;
-
+        var quantity = {{order_details.quantity}}
 
         if(bcArray.length == 0){
             bcArray.push(barcode);
             scanReq(barcode, pre_order_details);
-        }else{
+        }else if(bcArray.length > parseInt(quantity-1)){
+            alert("You are scanning more than Order");
+            $('#Barcode').val("");
+        }
+        else{
 
             for(var i=0; i<=bcArray.length; i++){
                 if(bcArray[i] == barcode){

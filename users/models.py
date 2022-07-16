@@ -47,3 +47,46 @@ class ActivityLog(models.Model):
     activity = models.CharField(max_length=255, null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class MenuList(models.Model):
+    menu_name   = models.CharField(max_length=50)
+    menu_url    = models.CharField(max_length=90)
+    module_types = (
+        ('Administration', 'Administration'),
+        ('Order', 'Order'),
+        ('Inventory', 'Inventory'),
+    )
+    module_name      = models.CharField(max_length=50, choices=module_types)
+    is_sub_menu      = models.BooleanField(default=False)
+    sub_menu_name    = models.CharField(max_length=50,blank=True,null=True)
+    menu_order       = models.IntegerField(default=0)
+    menu_icon        = models.CharField(max_length=50,blank=True)
+    status           = models.BooleanField(default=True)
+    created_at       = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.menu_name
+
+    class Meta:
+        db_table = 'menu_list'
+        verbose_name = "Menu"
+        verbose_name_plural = "Menu List" 
+
+class UserPermission(models.Model):
+    user            = models.ForeignKey(User, on_delete = models.CASCADE) 
+    menu            = models.ForeignKey(MenuList, on_delete = models.CASCADE)
+    view_action     = models.BooleanField(default = False)      
+    insert_action   = models.BooleanField(default = False)      
+    update_action   = models.BooleanField(default = False)      
+    delete_action   = models.BooleanField(default = False)   
+    permission_date = models.DateTimeField(auto_now_add=True)
+    permitted_by    = models.IntegerField(default=0) 
+    status          = models.BooleanField(default=True)   
+    
+    def __str__(self):
+        return str(self.user)   
+        
+    class Meta:
+        db_table = 'user_permission'
+        verbose_name = "User Permission"
+        verbose_name_plural = "User Permissions" 

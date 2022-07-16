@@ -47,7 +47,7 @@
             <div class="panel-heading">
                 <h4 class="panel-title">Barcodes</h4>
                 <div class="panel-control">
-                    <a href="{% url 'barcode_pdf' gid %}" target="_blank"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-print"></i> Print Bundles</button></a>
+                    <a href="{% url 'barcode_pdf' po_details item_name %}" target="_blank"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-print"></i> Print Bundles</button></a>
                 </div>
             </div>
         </div>
@@ -58,7 +58,7 @@
                         <div class="m-t-sm">
                             <div class="row">
                                 {% for p in barcodes %}
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-4">
                                         <table class="table table-bordered">
                                             <tbody>
                                                 <tr class="bg-dark light">

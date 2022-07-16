@@ -17,9 +17,6 @@
                 <div class="panel panel-info">
                     <div class="panel-heading">
                         <h4 class="panel-title">Generated Barcode List</h4>
-                        <div class="panel-control">
-                            <a href="#"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-plus"></i> Add</button></a>
-                        </div>
                     </div>
                     <div class="panel-body">
                         <div class="table-responsive m-t-sm">
@@ -41,7 +38,7 @@
                                        <th scope="row">{{ p.warehouse }}</td>
                                        <th scope="row">{{ p.total_barcode }}</td>
                                        <td scope="row" class="m-h-xs">
-                                           <a type="button" class="btn btn-success btn-xs" href="{% url 'barcode_details' p.generate_id %}"><i class="fa fa-eye"></i> view</a>
+                                           <a type="button" class="btn btn-success btn-xs" href="{% url 'barcode_details' p.po_details_id p.item_details %}"><i class="fa fa-eye"></i> view</a>
                                        </td>
                                    </tr>
                                    {% endfor %}

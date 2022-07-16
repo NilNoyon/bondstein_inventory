@@ -15,16 +15,16 @@ from datetime import date, datetime, timedelta
 from notifications.signals import notify
 from pre_order.models import *
 from inventory.models import *
+from .decorators import permission
+import pandas as pd
 
-# Create your views here.
-
+# Create your views here.s
 
 def index(request):
     if not request.user.is_active:
         return render(request, "login.html")
     else:
         return redirect('users:dashboard')
-        # return JsonResponse({'foo':'bar'})
 
 def dashboard(request):
     if not request.user.is_active:
@@ -32,16 +32,28 @@ def dashboard(request):
     else:
         total_pre_order = PreOrder.objects.all().count()
         total_item = ItemDetails.objects.all().count()
-        total_warehouse = Warehouse.objects.all().count()
+        total_warehouse = Warehouse.objects.exclude(name__icontains='float').count()
         total_salesorder = SalesOrder.objects.all().count()
+        total_so_item = SODetails.objects.all().values('item_details').distinct().count()
         total_sto = STChallan.objects.all().count()
+        total_sto_item = STCDetails.objects.all().values('item_details').distinct().count()
+        total_fo = FloatingSalesDetails.objects.all().count()
+        total_fo_item = FloatingSalesDetails.objects.all().values('item_details').distinct().count()
         stock_in = []
         stock_out = []
         damage = []
+        warehouses = []
         # for stock in
-        stocks_data = getProcessWiseTotalQuantity(request,1,'From Vendor')
-        stock_out_data = getProcessWiseTotalQuantity(request,1,'To Client')
-        damage_data = getProcessWiseTotalQuantity(request,1,'Damage')
+        if request.user.is_superuser:
+            warehouses = Warehouse.objects.exclude(name__icontains='float')
+            stocks_data = getProcessWiseTotalQuantity(request,0,'From Vendor')
+            stock_out_data = getProcessWiseTotalQuantity(request,0,'To Client')
+            damage_data = getProcessWiseTotalQuantity(request,0,'Damage')
+        else:
+            warehouse = request.user.warehouse
+            stocks_data = getProcessWiseTotalQuantity(request,warehouse,'From Vendor')
+            stock_out_data = getProcessWiseTotalQuantity(request,warehouse,'To Client')
+            damage_data = getProcessWiseTotalQuantity(request,warehouse,'Damage')
         for i in stocks_data:
             details = {
                 'slug':i['slug'],
@@ -68,10 +80,15 @@ def dashboard(request):
             'total_item':total_item,
             'total_warehouse':total_warehouse,
             'total_so':total_salesorder,
+            'total_so_item':total_so_item,
             'total_sto':total_sto,
+            'total_sto_item':total_sto_item,
+            'total_fo':total_fo,
+            'total_fo_item':total_fo_item,
             'stock_in':stock_in,
             'stock_out':stock_out,
             'damage':damage,
+            'warehouses': warehouses,
         }
         if request.user.is_superuser:
             return render(request, "dashboard/admin_dashboard.html", context)
@@ -79,7 +96,7 @@ def dashboard(request):
             return render(request, 'dashboard/user_dashboard.html', context)
 
 def getProcessWiseTotalQuantity(request,warehouse,process):
-    today = datetime.today().date()
+    today = datetime.now()
     last_day = datetime.today() - timedelta(days=1)
     this_week = datetime.today() - timedelta(days=6)
     last_day_of_this_week = datetime.today() - timedelta(days=7)
@@ -87,12 +104,12 @@ def getProcessWiseTotalQuantity(request,warehouse,process):
     last_month = today.month - 1
     if last_month == 0:
         last_month = 12
-        last_year = today.year - 1
-    if today.month < 9:
+    last_year = today.year - 1
+    if today.month <= 9:
         this_month_like = str(today.year)+'-0'+str(today.month)+'%'
     else:
         date_like = str(today.year)+'-'+str(today.month)+'%'
-    if last_month < 9:
+    if last_month <= 9:
         last_month_like = str(today.year)+'-0'+str(last_month)+'%'
     else:
         last_month_like = str(last_year)+'-'+str(last_month)+'%'
@@ -100,24 +117,32 @@ def getProcessWiseTotalQuantity(request,warehouse,process):
     # text_format = ['Today','Last Day','This Week','Last Week','This Month','Last Month']
     text_format = ['Today','Last Day','This Week']
     result = []
-    if process == 'From Vendor':
-        result.append(ScannedBarcode.objects.filter(from_vendor=True,scanning_date__date=today).count())
-
-        result.append(ScannedBarcode.objects.filter(from_vendor=True,scanning_date__date=last_day.date()).count())
-
-        result.append(ScannedBarcode.objects.filter(from_vendor=True).count())
-    elif process == 'To Client':
-        result.append(ScannedBarcode.objects.filter(to_client=True,scanning_date__date=today).count())
-
-        result.append(ScannedBarcode.objects.filter(to_client=True,scanning_date__date=last_day.date()).count())
-
-        result.append(ScannedBarcode.objects.filter(to_client=True).count())
-    elif process == 'Damage':
-        result.append(ScannedBarcode.objects.filter(damage=True,scanning_date__date=today).count())
-
-        result.append(ScannedBarcode.objects.filter(damage=True,scanning_date__date=last_day.date()).count())
-
-        result.append(ScannedBarcode.objects.filter(damage=True).count())
+    if warehouse == 0:
+        if process == 'From Vendor':
+            result.append(ScannedBarcode.objects.filter(from_vendor=1,scanning_date=today.date(),).count())
+            result.append(ScannedBarcode.objects.filter(from_vendor=1,scanning_date=last_day.date()).count())
+            result.append(ScannedBarcode.objects.filter(from_vendor=1,scanning_date__gte=this_week.date()).count())
+        elif process == 'To Client':
+            result.append(ScannedBarcode.objects.filter(to_client=1,scanning_date=last_day.date()).count())
+            result.append(ScannedBarcode.objects.filter(to_client=1,scanning_date=last_day.date()).count())
+            result.append(ScannedBarcode.objects.filter(to_client=1,scanning_date__gte=this_week.date()).count())
+        elif process == 'Damage':
+            result.append(ScannedBarcode.objects.filter(damage=1,scanning_date=today.date()).count())
+            result.append(ScannedBarcode.objects.filter(damage=1,scanning_date=last_day.date()).count())
+            result.append(ScannedBarcode.objects.filter(damage=1,scanning_date__gte=this_week.date()).count())
+    else:
+        if process == 'From Vendor':
+            result.append(ScannedBarcode.objects.filter(from_vendor=1,scanning_date=today.date(),barcode__warehouse=warehouse).count())
+            result.append(ScannedBarcode.objects.filter(from_vendor=1,scanning_date=last_day.date(),barcode__warehouse=warehouse).count())
+            result.append(ScannedBarcode.objects.filter(from_vendor=1,scanning_date__gte=this_week.date(),barcode__warehouse=warehouse).count())
+        elif process == 'To Client':
+            result.append(ScannedBarcode.objects.filter(to_client=1,scanning_date=today.date(),barcode__warehouse=warehouse).count())
+            result.append(ScannedBarcode.objects.filter(to_client=1,scanning_date=last_day.date(),barcode__warehouse=warehouse).count())
+            result.append(ScannedBarcode.objects.filter(to_client=1,scanning_date__gte=this_week.date(),barcode__warehouse=warehouse).count())
+        elif process == 'Damage':
+            result.append(ScannedBarcode.objects.filter(damage=1,scanning_date=today.date(),barcode__warehouse=warehouse).count())
+            result.append(ScannedBarcode.objects.filter(damage=1,scanning_date=last_day.date(),barcode__warehouse=warehouse).count())
+            result.append(ScannedBarcode.objects.filter(damage=1,scanning_date__gte=this_week.date(),barcode__warehouse=warehouse).count())
 
 
     # result.append(ScannedBarcode.objects.filter(process=process,part=1,scanned_at__range=[last_week,last_day_of_this_week],bcb__bc__company=company).aggregate(data=Sum('accepted_qty')))
@@ -139,6 +164,121 @@ def getProcessWiseTotalQuantity(request,warehouse,process):
         data_result.append(details)
         counter += 1
     return data_result
+
+@csrf_exempt
+def getDashboard(request):
+    warehouse = request.POST.get('warehouse')
+    if warehouse == 0:
+        total_pre_order = PreOrder.objects.all().count()
+        total_item = ItemDetails.objects.all().count()
+        total_warehouse = Warehouse.objects.exclude(name__icontains='float').count()
+        total_salesorder = SalesOrder.objects.all().count()
+        total_so_item = SODetails.objects.all().values('item_details').distinct().count()
+        total_sto = STChallan.objects.all().count()
+        total_sto_item = STCDetails.objects.all().values('item_details').distinct().count()
+        total_fo = FloatingSalesDetails.objects.all().count()
+        total_fo_item = FloatingSalesDetails.objects.all().values('item_details').distinct().count()
+        stock_in = []
+        stock_out = []
+        damage = []
+        warehouses = []
+        # for stock in
+        stocks_data = getProcessWiseTotalQuantity(request,0,'From Vendor')
+        stock_out_data = getProcessWiseTotalQuantity(request,0,'To Client')
+        damage_data = getProcessWiseTotalQuantity(request,0,'Damage')
+
+        for i in stocks_data:
+            details = {
+                'slug':i['slug'],
+                'quantity':i['data'],
+            }
+            stock_in.append(details)
+
+        for i in stock_out_data:
+            details = {
+                'slug':i['slug'],
+                'quantity':i['data'],
+            }
+            stock_out.append(details)
+
+        for i in damage_data:
+            details = {
+                'slug':i['slug'],
+                'quantity':i['data'],
+            }
+            damage.append(details)
+         
+        context = {
+            'total_po':total_pre_order,
+            'total_item':total_item,
+            'total_warehouse':total_warehouse,
+            'total_so':total_salesorder,
+            'total_so_item':total_so_item,
+            'total_sto':total_sto,
+            'total_sto_item':total_sto_item,
+            'total_fo':total_fo,
+            'total_fo_item':total_fo_item,
+            'stock_in':stock_in,
+            'stock_out':stock_out,
+            'damage':damage,
+        }
+        return render(request, "dashboard/dashboard.html", context)
+    else:
+        total_pre_order = PreOrder.objects.filter(created_by__warehouse=warehouse).count()
+        total_item = ItemDetails.objects.filter(warehouse=warehouse).exclude(name__icontains='float').count()
+        total_warehouse = Warehouse.objects.exclude(name__icontains='float').count()
+        total_salesorder = SalesOrder.objects.filter(warehouse=warehouse).count()
+        total_so_item = SODetails.objects.filter(so__warehouse=warehouse).values('item_details').distinct().count()
+        total_sto = STChallan.objects.filter(from_warehouse=warehouse).count()
+        total_sto_item = STCDetails.objects.filter(stc__from_warehouse=warehouse).values('item_details').distinct().count()
+        total_fo = FloatingSalesDetails.objects.filter(floating_order__warehouse=warehouse).count()
+        total_fo_item = FloatingSalesDetails.objects.filter(floating_order__warehouse=warehouse).values('item_details').distinct().count()
+        stock_in = []
+        stock_out = []
+        damage = []
+        warehouses = []
+        # for stock in
+        stocks_data = getProcessWiseTotalQuantity(request,warehouse,'From Vendor')
+        stock_out_data = getProcessWiseTotalQuantity(request,warehouse,'To Client')
+        damage_data = getProcessWiseTotalQuantity(request,warehouse,'Damage')
+
+        for i in stocks_data:
+            details = {
+                'slug':i['slug'],
+                'quantity':i['data'],
+            }
+            stock_in.append(details)
+
+        for i in stock_out_data:
+            details = {
+                'slug':i['slug'],
+                'quantity':i['data'],
+            }
+            stock_out.append(details)
+
+        for i in damage_data:
+            details = {
+                'slug':i['slug'],
+                'quantity':i['data'],
+            }
+            damage.append(details)
+         
+        context = {
+            'total_po':total_pre_order,
+            'total_item':total_item,
+            'total_warehouse':total_warehouse,
+            'total_so':total_salesorder,
+            'total_so_item':total_so_item,
+            'total_sto':total_sto,
+            'total_sto_item':total_sto_item,
+            'total_fo':total_fo,
+            'total_fo_item':total_fo_item,
+            'stock_in':stock_in,
+            'stock_out':stock_out,
+            'damage':damage,
+        }
+        return render(request, "dashboard/dashboard.html", context)
+
 
 #########################
 ## Login, Logout Error
@@ -163,7 +303,6 @@ def loginUser(request):
 
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
-        print(user)
         if user is None:
             message = 'User name / Password Mismatched!'
             messages.warning(request, message)
@@ -196,17 +335,18 @@ def otherSettings(request):
         try:
             if request.user.is_superuser:
                 roles = Role.objects.all()
-                warehouses = Warehouse.objects.all()
+                warehouses = Warehouse.objects.exclude(name__icontains='float')
                 status = Status.objects.all()
-                users = User.objects.exclude(Q(is_superuser=True)).all()
+                users = User.objects.exclude(Q(is_superuser=True)).all().order_by('-id')
                 context = {'roles': roles, 'warehouses':warehouses, 'status': status}
                 return render(request, "settings.html", context)
             else:
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 #########################
 ## Users Roles
@@ -219,7 +359,7 @@ def userSettings(request):
         try:
             if request.user.is_superuser:
                 roles = Role.objects.all()
-                warehouses = Warehouse.objects.all()
+                warehouses = Warehouse.objects.exclude(name__icontains='float')
                 status = Status.objects.all()
                 users = User.objects.exclude(Q(is_superuser=True)).all()
                 context = {'roles': roles, 'warehouses':warehouses, 'status': status,'users':users}
@@ -270,8 +410,9 @@ def deleteRole(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 @csrf_exempt
 def getRole(request):
     if not request.user.is_active:
@@ -292,8 +433,9 @@ def getRole(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @csrf_exempt
 def updateRole(request):
@@ -316,8 +458,9 @@ def updateRole(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 #########################
@@ -347,8 +490,9 @@ def addWarehouse(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @csrf_exempt
 def deleteWarehouse(request):
@@ -371,8 +515,9 @@ def deleteWarehouse(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @csrf_exempt
 def getWarehouse(request):
@@ -396,8 +541,9 @@ def getWarehouse(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @csrf_exempt
 def updateWarehouse(request):
@@ -422,8 +568,9 @@ def updateWarehouse(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 #########################
 #########################
@@ -440,7 +587,6 @@ def add(request):
                     request.POST['fullname'] = request.POST.get('fullname').title()
                     request.POST['password'] = make_password('bond@stein', salt=None, hasher='default')
                     form = UserAddForm(request.POST)
-                    # return HttpResponse(form)
                     if form.is_valid():
                         user = form.save()
                         message = 'User added successfully!'
@@ -457,17 +603,21 @@ def add(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 @csrf_exempt
 def delete(request):
-    user = User.objects.get(id=request.POST.get('id', ''))
-    message = user.name+' - user Have Been Deleted!'
-    user.delete()
-    messages.error(request, message)
-    return redirect('users:type_and_users')
+    try:
+        user = User.objects.get(id=request.POST.get('id', ''))
+        message = user.fullname+' - user Have Been Deleted!'
+        user.delete()
+        messages.error(request, message)
+        return redirect('users:users_settingss')
+    except Exception as e:
+        return redirect('users:users_settingss')
 
 
 @csrf_exempt
@@ -496,8 +646,9 @@ def get(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 @login_required
@@ -509,9 +660,8 @@ def update(request):
             if request.user.is_superuser:
                 if request.method == 'POST':
                     request.POST = request.POST.copy()
-                    user = User.objects.get(id=request.POST.get('id', ''))
+                    user = User.objects.get(id=request.POST.get('id'))
                     form = UserUpdateForm(request.POST, instance=user)
-                    # return HttpResponse(form)
                     if form.is_valid():
                         updatedUser = form.save()
                         message = 'User Updated successfully!'
@@ -520,16 +670,18 @@ def update(request):
                         for field in form:
                             for error in field.errors:
                                 messages.warning(request, "%s : %s" % (field.name, error))
+                                print(error)
                 else:
                     message = 'Method is not allowed!'
                     messages.warning(request, message)
-                return redirect('users:type_and_users')
+                return redirect('users:users_settings')
             else:
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 @login_required
@@ -553,18 +705,23 @@ def changePassword(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 @csrf_exempt
 def resetPassword(request):
-    user = User.objects.get(id=request.POST.get('id', ''))
-    user.password =  make_password('bond@stein', salt=None, hasher='default')
-    user.save()
-    message = user.fullname+' - Pasword Have Been Reseted!'
-    messages.error(request, message)
-    return redirect('users:users_settings')
+    try:
+        user = User.objects.get(id=request.POST.get('id', ''))
+        user.password =  make_password('bond@stein', salt=None, hasher='default')
+        user.save()
+        message = user.fullname+' - Pasword Have Been Reseted!'
+        messages.error(request, message)
+        return redirect('users:users_settings')
+    except Exception as e:
+        messages.warning(request, e)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 #########################
 ## Status
@@ -588,8 +745,9 @@ def addStatus(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @csrf_exempt
 def deleteStatus(request):
@@ -612,8 +770,9 @@ def deleteStatus(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @csrf_exempt
 def getStatus(request):
@@ -635,8 +794,9 @@ def getStatus(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @csrf_exempt
 def updateStatus(request):
@@ -660,5 +820,118 @@ def updateStatus(request):
                 message = 'You are not authorised!'
                 messages.warning(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        except:
-            return redirect('users:error_404_view')
+        except Exception as e:
+            messages.warning(request, e)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+### access control list...
+@login_required
+def user_access_control_setup(request):
+    # chk_permission   = permission(request, reverse("user_access_control_setup"))
+    # if chk_permission and chk_permission.view_action:
+        # this is use for sync menulist from excel file
+        #To read multiple sheet at once just follow this link, code needs to be change
+        #https://pythoninoffice.com/read-multiple-excel-sheets-with-python-pandas/
+        # xl = pd.read_excel("https://ebs.esquire.com.bd/assets/MenuList.xls", "Sheet1") \
+        # Local sync menulist from excel file
+        # xl = pd.read_excel("assets/MenuList.xls", "Sheet1") 
+        # for i in range(0,len(xl)):
+        #     chk_menu = MenuList.objects.filter(menu_url = xl['URL'][i])
+        #     if not chk_menu:
+        #         sub_menu_name, menu_icon = "", ""
+        #         is_sub_menu = True if str(xl["Is Sub Menu"][i]).lower() == 'yes' else False
+        #         if str(xl["Icon"][i]) != 'nan': menu_icon = str(xl["Icon"][i])
+        #         if str(xl["Sub Menu Name"][i]) != 'nan': sub_menu_name = str(xl["Sub Menu Name"][i]).title()
+        #         MenuList.objects.create(
+        #             module_name = xl["Module"][i], menu_name =  xl["Menu Name"][i], menu_url = xl["URL"][i], menu_order = xl["Ordering"][i],
+        #             menu_icon = menu_icon, sub_menu_name = sub_menu_name, is_sub_menu = is_sub_menu
+        #         )
+
+        if request.is_ajax():
+            user_prev_list = json.loads(request.POST.get('user_prev_list'))
+            user_id        = request.POST.get('user_id')
+            # user_role      = request.POST.get('user_role')
+            # designation    = request.POST.get('designation')
+            # department    = request.POST.get('department')
+            for data in user_prev_list:                    
+                menu_id        = data['menu_id']
+                view_action    = data['view_action']
+                insert_action  = data['insert_action']
+                update_action  = data['update_action']
+                delete_action  = data['delete_action']
+                
+                if user_id:
+                    chk_exist = UserPermission.objects.filter(user_id = user_id, menu_id = menu_id)
+                    if chk_exist:
+                        chk_exist.update(view_action = view_action, insert_action = insert_action, update_action = update_action, delete_action = delete_action)
+                    else:
+                        UserPermission.objects.create(user_id = user_id, menu_id = menu_id, view_action = view_action, insert_action = insert_action, update_action = update_action, delete_action = delete_action)
+                else:
+                    return JsonResponse("Something went wrong!",safe=False,content_type='application/json; charset=utf8')
+            
+            return JsonResponse("User access control setup successful",safe=False,content_type='application/json; charset=utf8')
+        else:        
+            context = {
+                'menu_list': MenuList.objects.filter(status = True).order_by('module_name','menu_order'),
+                'user_list': User.objects.filter(is_active = True).exclude(is_superuser=True)
+            }
+            return render(request, 'users/user_access_control_setup.html',context)
+    # else:
+    #     return redirect('/access-denied')
+
+@csrf_exempt
+@login_required
+def load_user_access_list(request):
+    chk_permission   = permission(request, reverse("user_access_control_setup"))
+    if chk_permission and chk_permission.view_action:
+        if request.is_ajax():
+            access_list = list(UserPermission.objects.values().filter(user_id = int(request.POST.get('user'))))
+            data = {
+                "access_list":access_list,
+            }
+        return JsonResponse(data,safe=False,content_type='application/json; charset=utf8')
+    else:
+        return JsonResponse("You have no access on this action!",safe=False,content_type='application/json; charset=utf8')
+                
+@login_required
+def user_access_control_list(request):
+    chk_permission   = permission(request, reverse("user_access_control_list"))
+    if chk_permission and chk_permission.view_action:
+        user_list  = Users.objects.filter(status = True).exclude(is_superuser=1)
+
+        if request.method == 'POST':
+            user_id   = request.POST.get('user')
+            access_list = []
+            if user_id:
+                access_list = UserPermission.objects.filter(user_id = int(user_id)).order_by("menu__module_name")
+
+            context = {
+                'access_list': access_list,
+                'user_list': user_list,
+                'user_id': int(user_id) if user_id else None,
+            }
+            return render(request, 'users/user_access_control_list.html', context)    
+        else:        
+            access_list = UserPermission.objects.filter(user_id = request.session.get('id')).order_by("menu__module_name")
+
+            context = {
+                    'access_list': access_list,
+                    'user_list': user_list
+                }
+            return render(request, 'users/user_access_control_list.html', context)
+    else:
+        return redirect('/access-denied')
+                
+@csrf_exempt
+@login_required
+def delete_user_access_control(request, id):
+    chk_permission   = permission(request, reverse("user_access_control_list"))
+    if chk_permission and chk_permission.view_action and chk_permission.delete_action:
+        UserPermission.objects.filter(id=id).delete()
+        return JsonResponse("success",safe=False,content_type='application/json; charset=utf8')
+    else:
+        return JsonResponse("You have no access on this action!",safe=False,content_type='application/json; charset=utf8')
+    
+@login_required
+def access_denied(request):
+    return render(request, '404.html')

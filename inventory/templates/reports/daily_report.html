@@ -1,0 +1,206 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Daily Inventory Report{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+
+<style>
+    .table td {
+        text-align: center;
+        border: 1px solid #000;
+    }
+    th, th *, td, td *{
+        vertical-align: middle !important;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="panel panel-info">
+              <div class="panel-body">
+                <div class="col-md-2">
+                  <!-- Report Date works as from_date -->
+                  <input name="report_date" type="text" class="date-picker form-control" id="report_date" placeholder="Select A Date..." autocomplete="Off">
+                </div>
+              
+                <div class="col-md-2">
+                    <input name="to_date" type="text" class="date-picker form-control" id="to_date" placeholder="Select A Date..." autocomplete="Off">
+                </div>
+                {% if warehouses %}
+                <div class="col-md-4">
+                    {% for w in warehouses %}
+                      <div class="col-md-4">
+                        <div class="radio-inline">
+                          <label>
+                            <input type="radio" class="form-control" name="warehouse" id="warehouse" value="{{ w.id }}"><b>{{ w.name }}</b>
+                          </label>
+                        </div>
+                      </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                  <div class="col-md-4">
+                      <input type="hidden" value="{{ request.user.warehouse_id }}" id="warehouse" name="warehouse">
+                  </div>
+                {% endif %}
+                <div class="col-md-4" align="right">
+                    <button type="button" class="btn btn-success" id="filterBtn" style="width: 100%"><i class="fa fa-filter"></i> Filter</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Daily Inventory Report</h4>
+                        <div class="panel-control">
+                            <a href="#" id="export_btn" target="_blank" style="display: none;"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-download"></i> Export as Excel</button></a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="loader" style="display: none;" align="center">
+                          <p><img src="{% static 'images/reload.gif' %}" /></p>
+                        </div>
+                        <div class="table-responsive m-t-sm" id="reportData">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script>
+    // DatePicker
+    $('.date-picker').datepicker({
+        orientation: "top auto",
+        autoclose: true,
+        todayBtn: 'linked',
+        format: 'yyyy-mm-dd'
+    });
+
+    window.onload = function(){
+        var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        const formatter = new Intl.DateTimeFormat('en-US', { month: 'long' });
+        var warehouse = $('#warehouse').val();
+        $("#reportData ").empty();
+        $('#report_date').val(date);
+        $('#to_date').val(date);
+        if(!warehouse){
+          company = 0;
+        }
+
+        $.ajax({
+              url : "{% url "get_daily_inventory_report" %}",
+              type: "POST",
+              data: { date : date, to_date : date, warehouse : warehouse },
+              dataType: 'html',
+              beforeSend: function(){
+                // document.getElementById("loader").style.display = "block";
+                $("#loader").show();
+               },
+              success : function(data) {
+                  $('#reportData').html(data)
+                  document.getElementById("export_btn").style.display = "block";
+                  document.getElementById("export_btn").href='/inventory/export-daily-inventory-report/'+date+'/'+date+'/'+warehouse;
+              },
+              complete:function(data){
+                  // document.getElementById("loader").style.display = "block";
+                  $("#loader").hide();
+                 },
+              error: function() {
+                  console.log('Error on loading records');
+              }
+        });
+    }
+
+    $('#filterBtn').on('click', function(e) {
+        // `e` here contains the extra attributes
+        var date = $('#report_date').val();
+        var to_date = $('#to_date').val();
+        var inputed_date = new Date(date);
+        const formatter = new Intl.DateTimeFormat('en-US', { month: 'long' });
+        $("#reportData ").empty();
+        var warehouse = $('#warehouse').val();
+        $('#report_date').val(date);
+        if(!warehouse){
+          company = 0;
+        }
+        $.ajax({
+              url : "{% url "get_daily_inventory_report" %}",
+              type: "POST",
+              data: { date : date, to_date : to_date, warehouse : warehouse },
+              dataType: 'html',
+              beforeSend: function(){
+                // document.getElementById("loader").style.display = "block";
+                $("#loader").show();
+               },
+              success : function(data) {
+                  $('#reportData').html(data)
+                  document.getElementById("export_btn").style.display = "block";
+                  document.getElementById("export_btn").href='/inventory/export-daily-inventory-report/'+date+'/'+to_date+'/'+warehouse;
+              },
+              complete:function(data){
+                  // document.getElementById("loader").style.display = "block";
+                  $("#loader").hide();
+                 },
+              error: function() {
+                  console.log('Error on loading records');
+              }
+        });
+    });
+
+    $(document).on('change', '[type="radio"]', function() {
+        var warehouse = $(this).val(); // Get the radio checked value
+        var date = $('#report_date').val();
+        var to_date = $('#to_date').val();
+        var inputed_date = new Date(date);
+        const formatter = new Intl.DateTimeFormat('en-US', { month: 'long' });
+        $("#reportData ").empty();
+        if(!warehouse){
+          warehouse = 0;
+        }
+        $.ajax({
+              url : "{% url "get_daily_inventory_report" %}",
+              type: "POST",
+              data: { date : date, to_date : to_date, warehouse : warehouse },
+              dataType: 'html',
+              beforeSend: function(){
+                // document.getElementById("loader").style.display = "block";
+                $("#loader").show();
+               },
+              success : function(data) {
+                  $('#reportData').html(data)
+                  document.getElementById("export_btn").style.display = "block";
+                  document.getElementById("export_btn").href='/inventoory/export-daily-inventory-report/'+date+'/'+to_date+'/'+warehouse;
+              },
+              complete:function(data){
+                  // document.getElementById("loader").style.display = "block";
+                  $("#loader").hide();
+                 },
+              error: function() {
+                  console.log('Error on loading records');
+              }
+        });
+      });
+</script>
+{% endblock %}

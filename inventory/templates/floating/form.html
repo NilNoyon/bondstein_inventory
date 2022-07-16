@@ -20,55 +20,35 @@
                     <div class="panel-heading">
                         <h4 class="panel-title">Add Floating Item</h4>
                         <div class="panel-control">
-                            <a href="{% url 'sto_list' %}"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-list"></i> list</button></a>
+                            <a href="{% url 'fi_list' %}"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-list"></i> list</button></a>
                         </div>
                     </div>
                     <div class="panel-body">
                         <div class="m-t-sm">
-                            <form class="m-t-md" id="soForm" action="{% url 'add_sto' %}" method="post">
+                            <form class="m-t-md" id="foForm" action="{% url 'add_fo' %}" method="post">
                                 {% csrf_token %}
-                                <input type="hidden" name="id" id="sto_id" value="{{ challan_no }}">
+                                <input type="hidden" name="id" id="fo_id" value="">
                                 <div class="row no-m">
                                     <div class="col-md-5">
                                         <div class="panel panel-white">
                                             <div class="panel-body">
                                                 <div class="row">
                                                     <div class="col-md-6">
-                                                        <label for="from_warehouse">From Warehouse:</label>
-                                                        {% if request.user.is_superuser %}
-                                                            <select class="form-control m-b-sm client" id="from_warehouse" name="from_warehouse" required>
-                                                                <option value="">Select A Warehouse</option>
-                                                                {% for warehouse in warehouses %}
-                                                                <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        {% else %}
-                                                            <select class="form-control m-b-sm from_warehouse" id="from_warehouse" name="from_warehouse" required>
-                                                                <option value="{{ request.user.warehouse.id }}">{{ request.user.warehouse.name }}</option>
-                                                            </select>
-                                                        {% endif %}
+                                                        <div class="form-group">
+                                                            <label for="order_no">Floating Order No:</label>
+                                                            <input name="order_no" type="text" class="form-control" id="order_no" value="{{ order_no }}">
+                                                        </div>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <div class="form-group">
-                                                            <label for="to_warehouse">To Warehouse</label>
-                                                            <select class="form-control m-b-sm to_warehouse" id="to_warehouse" name="to_warehouse" required>
-                                                                <option value="">Select A Warehouse</option>
-                                                                {% for warehouse in warehouses %}
-                                                                <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
-                                                                {% endfor %}
-                                                            </select>
+                                                            <label for="takeover_date">Date:</label>
+                                                            <input name="takeover_date" type="text" class="form-control date-picker" id="takeover_date" placeholder="Enter Date..." value="{{date|date:'m/d/Y'}}">
                                                         </div>
                                                     </div>
                                                 </div>
                                                 
                                                 <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label for="challan_no">Transfer Challan No:</label>
-                                                            <input name="challan_no" type="text" class="form-control" id="challan_no" value="{{ challan_no }}">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
+                                                    <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label for="remarks">Remarks:</label>
                                                             <input name="remarks" type="text" class="form-control" id="remarks" placeholder="Enter Remarks">
@@ -83,46 +63,56 @@
                                                             <input name="delivery_person" type="text" class="form-control" id="delivery_person" value="{{ delivery_person }}">
                                                         </div>
                                                     </div>
-                                                
+                                                	<div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="phone_no">Phone No</label>
+                                                            <input name="phone_no" type="text" class="form-control" id="phone_no" value="{{ phone_no }}">
+                                                        </div>
+                                                    </div>
                                                 </div>
 
                                             </div>
                                         </div>
                                     </div>
+                            </form>
                                     <div class="col-md-7">
                                         <div class="panel panel-white">
                                             <div class="panel-body">
-                                                <div class="row duplicateMe">
-                                                    <div class="col-md-4">
-                                                    	<div class="form-group">
-	                                                        <select class="form-control m-b-sm item_details" id="item_details" name="item_details">
-	                                                            <option value="">Select An Item - (unit price)</option>
-	                                                            {% for item in item_details %}
-	                                                            	<option value="{{ item.id }}">{{ item.name }} - {{ item.unit_price }}</option>
-	                                                            {% endfor %}
-	                                                        </select>
-	                                                    </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <input type="number" class="form-control quantity" name="quantity" placeholder="Quantity">
-                                                        </div>
-                                                    </div>
-                                                    <!-- <div class="col-md-3">
-                                                        <div class="form-group">
-                                                            <input type="number" class="form-control price" name="price" placeholder="Price" onkeyup="price_calculation()">
-                                                        </div>
-                                                    </div> -->
-                                                    <div class="col-md-1">
-                                                        <button type="button" class="btn btn-success" style="margin-top: 1px;" id="repeat"><i class="fa fa-plus"></i></button>
-                                                    </div>
-                                                </div>
+                                            	<form method="post" class="m-t-lg" action="" id="scanForm">
+						                            {% csrf_token %}
+						                            <div class="row">
+						                                <div class="col-md-4">
+						                                    <div class="form-group text-center">
+						                                        <input id="Barcode" class="form-control input-lg" type="text" autofocus name="barcode" placeholder="Enter Barcode ...">
+						                                    </div>
+						                                </div>
+						                                <div class="col-md-6">
+						                                    <div class="text-left">
+						                                        <h3>
+						                                            <span class="text-success" id="scannedBundleCount"></span>
+						                                        </h3>
+						                                    </div>
+						                                </div>
+						                            </div>
+						                        </form>
+                                                <div class="table-responsive m-t-sm">
+					                            <table class="table table-hover table-bordered" id="bcTable">
+					                               <thead>
+					                                   <tr>
+					                                       <th class="text-center">Product Barcode</th>
+					                                       <th class="text-center">Item Name</th>
+					                                       <th style="width: 25px">Action</th>
+					                                   </tr>
+					                               </thead>
+					                               <tbody id="scanData">
+					                               </tbody>
+					                            </table>
+					                        </div>
                                             </div>
                                         </div>
-                                        <button type="submit" class="btn btn-success btn-block"><h4>Save Information</h4></button>
+                                        <button type="button" class="btn btn-success btn-block" id="submit_btn"><h4>Save Information</h4></button>
                                     </div>
                                 </div>
-                            </form>
                         </div>
                     </div>
                 </div>
@@ -138,11 +128,6 @@
 <script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
 <script src="{% static 'plugins/select2/js/select2.js' %}"></script>
 <script>
-    // Select2
-    $('.to_warehouse').select2({placeholder: "Select A Warehouse"});
-    $('.from_warehouse').select2({placeholder: "Select A Warehouse"});
-    $('.item_details').select2({placeholder: "Select Item"});
-
     // DatePicker
     $('.date-picker').datepicker({
         orientation: "top auto",
@@ -151,66 +136,85 @@
         startDate: new Date()
     });
 
+    $( document ).ready(function() {
+	    $('#submit_btn').on('click', function(){
+	    	$("#foForm").submit();
+	    });
+	});
 
+    var bcArray = new Array();
+    $('#scanForm').on('submit', function(e){
 
-    // Duplicate Form Data
-    $('body').on('click', '#repeat', function(){
-        $duplicate = $('.duplicateMe');
+        e.preventDefault();
 
-        $duplicate.find('span').remove();
+        var barcode = $('#Barcode').val();
+        var matched = 0;
 
-        var clone = $duplicate.html();
-		$('.duplicateMe').parent().append('<div class="row duplicateMe">'+clone+'</div>');
-		$('.item_details').select2({placeholder: "Select Item ..", width: '100%', width: '100%'});
-        $(this).parent().append('<button type="button" class="btn btn-danger" style="margin-top: 1px;" id="remove"><i class="fa fa-close"></i></button>');
-        $(this).remove();
-        $duplicate.removeClass('duplicateMe');
-    });
-
-    // Remove Form data
-    $('body').on('click', '#remove', function(){
-        $(this).parent().parent().remove();
-    });
-
-    $("#soForm").on('change', '#client', function(){
-        var client = $(this).val();
-        $.ajax({
-            url : "{% url "get_responsible_person" %}",
-            type : "POST",
-            data : { client : client },
-            success : function(data) {
-                // $(".responsible_person").append($('<option>Select Responsible Person</option>'));
-                for (var i = 0; i < data.length; i++) {
-                  $(".responsible_person").append($('<option>', {value: data[i].id, text: data[i].name}));
+        if(bcArray.length == 0){
+            bcArray.push(barcode);
+            scanReq(barcode);
+        }else{
+            for(var i=0; i<=bcArray.length; i++){
+                if(bcArray[i] == barcode){
+                    matched = 1;
                 }
-                $(".responsible_person").select2({
+            }
 
-                });
-            },
-            error : function(xhr,errmsg,err) {
-                toastr.options = {
-                    closeButton: true,
-                    progressBar: true,
-                    showMethod: 'fadeIn',
-                    hideMethod: 'fadeOut',
-                    timeOut: 3500
-                };
-            	toastr.error('Oops! We have encountered an error.');
-        	}
-        });
-    });
-
-    function price_calculation() {
-        var price = document.querySelectorAll('.price');
-        var totals = 0;
-
-        //Sum calculation
-        for (var i = 0; i <price.length; i++)
-        {
-          totals = totals + Number(price[i].value);
+            if(matched == 1){
+                alert('Already Scanned!');
+                $('#Barcode').val("");
+            }else{
+                scanReq(barcode);
+                bcArray.push(barcode);
+            }
         }
-        document.getElementById('so_amount').value = parseInt(totals);
+
+    });
+    var counter = 0;
+    function scanReq(barcode){
+        $.ajax({
+            url : "{% url "scan_for_floating" %}",
+            type : "POST",
+            dataType: "JSON",
+            data : { barcode : barcode},
+            success : function(response) {
+                console.log(response);
+                if(response['status'] == 'Success'){
+                    result = response['bc_data'];
+
+                    $('#scanData').append("<tr><td class='text-center'><input type='hidden' name='barcode' value='"+result['bid']+"'>"+result['barcode']+"</td><td class='text-center'><input type='hidden' name='item_details' value='"+result['item_details']+"'>"+result['item_name']+"</td><td><button class='btn btn-sm btn-danger dltBC' data-bcb='"+result['barcode']+"'>X</button></td></tr>");
+
+                    $('#Barcode').val("");
+                    counter = counter + 1;
+                    $('#scannedBundleCount').html("Scanned Barcode: "+ counter);
+                }else if(response['status'] == 'Client'){
+                    alert(barcode +' - this item already scanned for a client');
+                    $('#Barcode').val("");
+               	}else if(response['status'] == 'Damage'){
+                    alert(barcode +' - this item is damage');
+                    $('#Barcode').val("");
+                }else if(response['status'] == 'Technician'){
+                    alert(barcode +' - this item already scanned for another delivery person');
+                    $('#Barcode').val("");
+                }
+                else if(response['status'] == 'Not Found'){
+                    alert(barcode +' - this item not found');
+                    $('#Barcode').val("");
+                }else if(response['status'] == 'Not Exists'){
+                    alert(barcode +' - this barcode not exists');
+                    $('#Barcode').val("");
+                }
+            }
+        });
     }
+
+
+    $('body').on('click', '.dltBC', function(e){
+        bcArray.pop($(this).data('bcb'));
+        $(this).parent().parent().remove();
+        counter = counter - 1;
+        $('#scannedBundleCount').html(" "+ counter);
+    });
 
 </script>
 {% endblock %}

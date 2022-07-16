@@ -57,7 +57,9 @@
                                        <td scope="row" class="m-h-xs">
                                            <!-- <a href="#"><button class="btn btn-success btn-xs"><i class="fa fa-edit"></i></button></a> -->
                                            <a href="{% url 'pre_order_details_list' p.id %}"><button class="btn btn-success btn-xs"><i class="fa fa-database"></i></button></a>
+                                           {% if request.user.is_superuser %}
                                            <button type="button" class="btn btn-google btn-xs" id="deletePO" data-id="{{ p.id }}"><i class="fa fa-close"></i></button>
+                                           {% endif %}
                                        </td>
                                    </tr>
                                    {% endfor %}

@@ -13,7 +13,7 @@ urlpatterns = [
 
     # dashboard
     path('dashboard', views.dashboard, name='dashboard'),
-
+    path('ajax-get-dashboard', views.getDashboard, name='get_dashboard'),
     # users dashboard..
     path('users',views.userSettings, name='users_settings'),
     path('users-roles-warehouses-status',views.otherSettings, name='other_settings'),
@@ -43,4 +43,11 @@ urlpatterns = [
     path('delete', views.delete, name='delete'),
     path('changed-password/', views.changePassword, name='change_password'),
     path('reset-password/', views.resetPassword, name='reset_password'),
+
+    # for access control...
+    path('user/access-control-setup/', views.user_access_control_setup, name='user_access_control_setup'),
+    path('user/access-control-load/', views.load_user_access_list, name='load_user_access_list'),
+    path('user/access-control-list/', views.user_access_control_list, name='user_access_control_list'),
+    path('user/access-control/<int:id>/delete/', views.delete_user_access_control, name='delete_user_access_control'),
+    path('access-denied', views.access_denied, name='access_denied'),
 ]

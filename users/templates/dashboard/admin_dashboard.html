@@ -1,232 +1,277 @@
 {% extends "admin.html" %}
-
+{% load static %}
 {% block title %}Admin Dashboard{% endblock %}
+{% block css %}
+<style type="text/css">
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.75) url("assets/images/reload.gif") no-repeat center center;
+    }
+    img {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div id="main-wrapper" class="container-fluid p-h-lg">
     <!-- Row -->
-    <div class="row">
-        <div class="col-lg-2 col-md-4">
-            <div class="panel info-box panel-white">
-                <div class="panel-body">
-                    <div class="info-box-stats">
-                        <p class="counter">{{ total_po }}</p>
-                        <span class="info-box-title">Total PO</span>
+    {% if request.user.is_superuser%}
+    <div class="row" id="admin_section">
+      <div class="col-md-12">
+        <div class="panel panel-white">
+          <div class="panel-body">
+            {% if warehouses %}
+              {% for warehouse in warehouses %}
+              <div class="col-md-3">
+                <div class="radio-inline">
+                  <label><input type="radio" name="optradio" id="warehouse" value="{{ warehouse.id }}"><b>{{ warehouse.name|upper }}</b></label>
+                </div>
+              </div>
+              {% if forloop.last %}
+                <div class="col-md-3">
+                    <div class="radio-inline">
+                      <label><input type="radio" name="optradio" id="warehouse" value="0"><b>ALL</b></label>
                     </div>
-                    <div class="info-box-icon">
-                        <i class="icon-users"></i>
+                </div>
+              {% endif %}
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    <div id="dashboardData">
+        <!-- Row -->
+        <div class="row" id="singleData">
+            <div class="col-lg-2 col-md-4">
+                <div class="panel info-box panel-white">
+                    <div class="panel-body">
+                        <div class="info-box-stats">
+                            <p><text class="counter">{{ total_po }}</text>/<text class="counter">{{ total_item }}</text></p>
+                            <span class="info-box-title">Total PO/PO Wise Item</span>
+                        </div>
+                        <div class="info-box-icon">
+                            <i class="icon-users"></i>
+                        </div>
+                        <div class="info-box-progress">
+                            <div class="progress progress-xs progress-squared bs-n">
+                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="info-box-progress">
-                        <div class="progress progress-xs progress-squared bs-n">
-                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <div class="panel info-box panel-white">
+                    <div class="panel-body">
+                        <div class="info-box-stats">
+                            <p><text class="counter">{{ total_so }}</text>/<text class="counter">{{ total_so_item }}</text></p>
+                            <span class="info-box-title">Total SO/SO Wise Item</span>
+                        </div>
+                        <div class="info-box-icon">
+                            <i class="icon-folder"></i>
+                        </div>
+                        <div class="info-box-progress">
+                            <div class="progress progress-xs progress-squared bs-n">
+                                <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <div class="panel info-box panel-white">
+                    <div class="panel-body">
+                        <div class="info-box-stats">
+                            <p><text class="counter">{{ total_sto }}</text>/<text class="counter">{{ total_sto_item }}</text></p>
+                            <span class="info-box-title">STO/STO Wise Item</span>
+                        </div>
+                        <div class="info-box-icon">
+                            <i class="icon-doc"></i>
+                        </div>
+                        <div class="info-box-progress">
+                            <div class="progress progress-xs progress-squared bs-n">
+                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <div class="panel info-box panel-white">
+                    <div class="panel-body">
+                        <div class="info-box-stats">
+                            <p><text class="counter">{{ total_fo }}</text>/<text class="counter">{{ total_fo_item }}</text></p>
+                            <span class="info-box-title">Total Floating / Item</span>
+                        </div>
+                        <div class="info-box-icon">
+                            <i class="icon-doc"></i>
+                        </div>
+                        <div class="info-box-progress">
+                            <div class="progress progress-xs progress-squared bs-n">
+                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <div class="panel info-box panel-white">
+                    <div class="panel-body">
+                        <div class="info-box-stats">
+                            <p class="counter">{{ total_item }}</p>
+                            <span class="info-box-title">Total Item</span>
+                        </div>
+                        <div class="info-box-icon">
+                            <i class="fa fa-cubes"></i>
+                        </div>
+                        <div class="info-box-progress">
+                            <div class="progress progress-xs progress-squared bs-n">
+                                <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <div class="panel info-box panel-white">
+                    <div class="panel-body">
+                        <div class="info-box-stats">
+                            <p class="counter">{{ total_warehouse }}</p>
+                            <span class="info-box-title">Total Warehouse</span>
+                        </div>
+                        <div class="info-box-icon">
+                            <i class="fa fa-university"></i>
+                        </div>
+                        <div class="info-box-progress">
+                            <div class="progress progress-xs progress-squared bs-n">
+                                <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-2 col-md-4">
-            <div class="panel info-box panel-white">
-                <div class="panel-body">
-                    <div class="info-box-stats">
-                        <p class="counter">{{ total_so }}</p>
-                        <span class="info-box-title">Total SO</span>
+        <!-- Row -->
+        <div class="row" id="multipleData">
+            <div class="col-lg-4 col-md-12">
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Stock In Status</h4>
                     </div>
-                    <div class="info-box-icon">
-                        <i class="icon-folder"></i>
-                    </div>
-                    <div class="info-box-progress">
-                        <div class="progress progress-xs progress-squared bs-n">
-                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                            </div>
+                    <div class="panel-body">
+                        <div class="table-responsive project-stats">
+                            <table class="table table-hover table-striped table-border" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="50%">#</th>
+                                        <th width="50%">Vendor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockInTable">
+                                  {% for cdata in stock_in %}
+                                    <tr>
+                                        <th>{{ cdata.slug }}</th>
+                                        <td>
+                                            {{ cdata.quantity}}
+                                          
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-2 col-md-4">
-            <div class="panel info-box panel-white">
-                <div class="panel-body">
-                    <div class="info-box-stats">
-                        <p class="counter">{{ total_sto }}</p>
-                        <span class="info-box-title">Total STO</span>
+            <div class="col-lg-4 col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Stock Out Status</h4>
                     </div>
-                    <div class="info-box-icon">
-                        <i class="icon-doc"></i>
-                    </div>
-                    <div class="info-box-progress">
-                        <div class="progress progress-xs progress-squared bs-n">
-                            <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                            </div>
+                    <div class="panel-body">
+                        <div class="table-responsive project-stats">
+                            <table class="table table-hover table-striped table-border" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="50%">#</th>
+                                        <th width="50%">Client</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockOutTable">
+                                    {% for cdata in stock_out %}
+                                    <tr>
+                                        <th>{{ cdata.slug }}</th>
+                                        <td>
+                                            {{ cdata.quantity}}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-2 col-md-4">
-            <div class="panel info-box panel-white">
-                <div class="panel-body">
-                    <div class="info-box-stats">
-                        <p class="counter">{{ total_item }}</p>
-                        <span class="info-box-title">Total Item</span>
+            <div class="col-lg-4 col-md-12">
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Damage Status</h4>
                     </div>
-                    <div class="info-box-icon">
-                        <i class="fa fa-cubes"></i>
-                    </div>
-                    <div class="info-box-progress">
-                        <div class="progress progress-xs progress-squared bs-n">
-                            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2 col-md-4">
-            <div class="panel info-box panel-white">
-                <div class="panel-body">
-                    <div class="info-box-stats">
-                        <p class="counter">{{ Coms }}</p>
-                        <span class="info-box-title">Total Company</span>
-                    </div>
-                    <div class="info-box-icon">
-                        <i class="fa fa-university"></i>
-                    </div>
-                    <div class="info-box-progress">
-                        <div class="progress progress-xs progress-squared bs-n">
-                            <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2 col-md-4">
-            <div class="panel info-box panel-white">
-                <div class="panel-body">
-                    <div class="info-box-stats">
-                        <p class="counter">{{ total_warehouse }}</p>
-                        <span class="info-box-title">Total Warehouse</span>
-                    </div>
-                    <div class="info-box-icon">
-                        <i class="fa fa-university"></i>
-                    </div>
-                    <div class="info-box-progress">
-                        <div class="progress progress-xs progress-squared bs-n">
-                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                            </div>
+                    <div class="panel-body">
+                        <div class="table-responsive project-stats">
+                            <table class="table table-hover table-striped table-border" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="50%">#</th>
+                                        <th width="50%">Damage</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="damageTable">
+                                    {% for cdata in damage %}
+                                    <tr>
+                                        <th>{{ cdata.slug }}</th>
+                                        <td>
+                                            {{ cdata.quantity}}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Row -->
-    <div class="row">
-        <div class="col-lg-4 col-md-12">
-            <div class="panel panel-success">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Stock In Status</h4>
-                </div>
-                <div class="panel-body">
-                    <div class="table-responsive project-stats">
-                        <table class="table table-hover table-striped table-border" width="100%">
-                            <thead>
-                                <tr>
-                                    <th width="50%">#</th>
-                                    <th width="50%">Vendor</th>
-                                </tr>
-                            </thead>
-                            <tbody id="stockInTable">
-                              {% for cdata in stock_in %}
-                                <tr>
-                                    <th>{{ cdata.slug }}</th>
-                                    <td>
-                                        {{ cdata.quantity}}
-                                      
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-12">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Stock Out Status</h4>
-                </div>
-                <div class="panel-body">
-                    <div class="table-responsive project-stats">
-                        <table class="table table-hover table-striped table-border" width="100%">
-                            <thead>
-                                <tr>
-                                    <th width="50%">#</th>
-                                    <th width="50%">Client</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for cdata in stock_out %}
-                                <tr>
-                                    <th>{{ cdata.slug }}</th>
-                                    <td>
-                                        {{ cdata.quantity}}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-12">
-            <div class="panel panel-danger">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Damage Status</h4>
-                </div>
-                <div class="panel-body">
-                    <div class="table-responsive project-stats">
-                        <table class="table table-hover table-striped table-border" width="100%">
-                            <thead>
-                                <tr>
-                                    <th width="50%">#</th>
-                                    <th width="50%">Damage</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for cdata in stock_out %}
-                                <tr>
-                                    <th>{{ cdata.slug }}</th>
-                                    <td>
-                                        {{ cdata.quantity}}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div id="loader" align="center">
+        <img src="{% static 'images/reload.gif' %}" alt="Icon" height="30">
     </div>
-    <!-- <div class="row">
-      <div class="col-md-6">
-        <div id="barchart" style="width: 500px; height: 400px;"></div>
-      </div>
-      <div class="col-md-6">
-        <div id="bar_chart" style="width: 500px; height: 400px"></div>
-      </div>
-    </div> -->
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
     $(document).ready(function() {
-
+        $('#loader').hide()
         // CounterUp Plugin
         $('.counter').counterUp({
             delay: 10,
@@ -237,61 +282,28 @@
 </script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
-      google.charts.load('current', {'packages':['bar']});
-      google.charts.setOnLoadCallback(drawChart);
+  $(document).on('change', '[type="radio"]', function() {
+        var warehouse = $(this).val(); // Get the radio checked value
+        $('#singleData').empty();
+        $('#multipleData').empty();
+        $('#loader').fadeIn()
+        $('#loader').show()
 
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-         ['Element', 'Quantity', { role: 'style' }],
-         ['Stock In', 2000, '#b87333'],            // RGB value
-         ['Stock Out', 800, 'silver'],            // English color name
-         ['Damage', 5, 'gold'],
+        $.ajax({
+            cache: false,
+            url : '/ajax-get-dashboard',
+            type: "POST",
+            data : { warehouse : warehouse },
+            dataType: "html",
+            success : function(data) {
+                $('#dashboardData').html(data)
+            },
+            error: function() {
+              console.log('Error on loading records');
+            },
 
-         //['Platinum', 21.45, 'color: #e5e4e2' ], // CSS-style declaration
-      ]);
-
-        var options = {
-          chart: {
-            title: 'Daily Stock Update: ',
-            subtitle: 'Total Quantity Update',
-            titelPosition: 'none',
-          },
-          axes: {
-            x: {
-              // 0: { side: 'bottom', label: 'Output | Target'} // Top x-axis.
-            }
-          },
-          bars: 'horizontal' // Required for Material Bar Charts.
-        };
-
-        var chart = new google.charts.Bar(document.getElementById('barchart'));
-
-        chart.draw(data, google.charts.Bar.convertOptions(options));
-      }
-</script>
-<script type="text/javascript">
-      google.charts.load('current', {'packages':['bar']});
-      google.charts.setOnLoadCallback(drawChart);
-
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-          ['Year', 'Sales', 'Expenses', 'Profit'],
-          ['2014', 1000, 400, 200],
-          ['2015', 1170, 460, 250],
-          ['2016', 660, 1120, 300],
-          ['2017', 1030, 540, 350]
-        ]);
-
-        var options = {
-          chart: {
-            title: 'Company Performance',
-            subtitle: 'Sales, Expenses, and Profit: 2014-2017',
-          }
-        };
-
-        var chart = new google.charts.Bar(document.getElementById('bar_chart'));
-
-        chart.draw(data, google.charts.Bar.convertOptions(options));
-      }
+        });
+        $('#loader').hide()
+    });
 </script>
 {% endblock %}

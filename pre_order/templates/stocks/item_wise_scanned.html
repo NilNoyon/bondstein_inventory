@@ -1,0 +1,98 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Item Wise Scanned Report{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+
+<style>
+    .table td {
+        text-align: center;
+        border: 1px solid #000;
+    }
+    th, th *, td, td *{
+        vertical-align: middle !important;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="panel panel-info">
+              <div class="panel-body">
+                  <select class="form-control m-b-sm" id="item" name="item" style="width: 100%;">
+                      <option value="" selected>Select Item</option>
+                      {% for item in stocks %}
+                      <option value="{{ item.0 }}">{{ item.1 }}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Item Wise Scanned Product List</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="table table-hover table-bordered" id="poTable">
+                               <thead>
+                                   <tr>
+                                       <th class="text-center">Product Barcode</th>
+                                       <th class="text-center">Item Name</th>
+                                       <th class="text-center">Unit Price</th>
+                                       <th class="text-center">Supplier</th>
+                                       <th class="text-center">Warehouse</th>
+                                       <th class="text-center">Scanning Date</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="reportData">
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    $('#item').select2({placeholder: "Select Item"});
+
+    $('#item').on('change',function(){
+        var item = jQuery(this).children(":selected").attr("value");
+        $("#reportData ").html("");
+        $.ajax({
+          url : "{% url "get_item_wise_scanned_product" %}",
+          type : "POST",
+          data : { item : item },
+          dataType: 'html',
+          success: function(data){
+            $('#reportData').html(data)
+          },
+          error: function(err){
+
+          },
+        });
+    });
+
+</script>
+{% endblock %}

@@ -112,17 +112,89 @@ class FloatingSalesOrder(models.Model):
 	delivery_person = models.CharField(max_length=200, null=True, blank=True)
 	phone_no = models.CharField(max_length=14, null=True, blank=True)
 	total_item = models.IntegerField(default=0)
+	total_sell = models.IntegerField(default=0)
+	total_return = models.IntegerField(default=0)
 
 	class Meta:
 		db_table = 'floating_sales_order'
+
+	def get_total_item(self):
+		return FloatingSalesDetails.objects.filter(floating_order=self.id).count()
+
+	def get_total_sell(self):
+		return FloatingSalesDetails.objects.filter(floating_order=self.id,is_sold=True).count()
 
 class FloatingSalesDetails(models.Model):
 	floating_order = models.ForeignKey(FloatingSalesOrder, on_delete=models.CASCADE, null=True, blank=True)
 	item_details = models.ForeignKey(ItemDetails, on_delete=models.CASCADE, null=True)
 	barcode 	= models.ForeignKey(Barcode, on_delete=models.CASCADE, null=True)
 	is_sold		= models.BooleanField(default=0)
+	updated_at = models.DateTimeField(auto_now_add=True)
 
 	class Meta:
 		db_table = 'floating_sales_details'
 
-	
+class ChannelDemand(models.Model):
+	name = models.CharField(max_length=100, null=True, blank=True)
+	client_name = models.CharField(max_length=100, null=True, blank=True)
+	month = models.IntegerField(default=0)
+	year = models.IntegerField(default=2021)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now_add=True)
+	created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True,blank=True)
+	warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, null=True,blank=True)
+
+	class Meta:
+		db_table = 'channel_demands'
+
+class ChannelDemandDetails(models.Model):
+	channel = models.ForeignKey(ChannelDemand, on_delete=models.CASCADE, null=True, blank=True)
+	device_type = models.ForeignKey(ItemDetails, on_delete=models.CASCADE, null=True)
+	quantity = models.IntegerField(default=0)
+	final_demand = models.IntegerField(default=0)
+	order_probability = models.CharField(max_length=20, null=True, blank=True)
+	weight = models.FloatField(default=0)
+	warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, null=True, blank=True)
+
+	class Meta:
+		db_table = 'channel_demand_details'
+
+class ForecastData(models.Model):
+	MONTH_CHOICES = [
+        ('January', '1'),
+        ('February', '2'),
+        ('March', '3'),
+        ('April', '4'),
+        ('May', '5'),
+        ('June', '6'),
+        ('July', '7'),
+        ('August', '8'),
+        ('September', '9'),
+        ('October', '10'),
+        ('November', '11'),
+        ('December', '12'),
+    ]
+	month = models.CharField(max_length=10,choices=MONTH_CHOICES,default='0')
+	year = models.IntegerField(default=timezone.now().year)
+	created_at = models.DateTimeField(auto_now_add=True)
+	created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+	updated_at = models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+		db_table = 'forecast_data'
+
+	def total_idq(self):
+		return sum([obj.id_quantity for obj in ForecastDetails.objects.filter(forecast=self.id)])
+
+	def total_iq(self):
+		return sum([obj.i_quantity for obj in ForecastDetails.objects.filter(forecast=self.id)])
+
+class ForecastDetails(models.Model):
+	forecast = models.ForeignKey(ForecastData, on_delete=models.CASCADE, null=True, blank=True)
+	item_details = models.ForeignKey(ItemDetails, on_delete=models.CASCADE, null=True, blank=True)
+	item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
+	id_quantity = models.IntegerField(default=0)
+	i_quantity = models.IntegerField(default=0)
+
+	class Meta:
+		db_table = 'forecast_details'

@@ -3,15 +3,18 @@ from django.utils import timezone
 from users.models import *
 
 # Create your models here.
-
 class Supplier(models.Model):
 	name = models.CharField(max_length = 50, unique = True)
 	contact = models.CharField(max_length = 150, null=True, blank=True)
+	email = models.EmailField(unique=False)
 	address = models.CharField(max_length = 150, null=True, blank=True)
+	item = models.ManyToManyField('pre_order.Item',related_name='suppliers_item')
 	created_at = models.DateTimeField(auto_now_add=True)
+	added_by = models.ForeignKey(User,on_delete=models.CASCADE, null=True)
 
 	class Meta:
 		db_table = 'suppliers'
+
 
 class ItemCategory(models.Model):
 	name = models.CharField(max_length=50, unique=True)
@@ -42,6 +45,7 @@ class ItemDetails(models.Model):
 
 	class Meta:
 		db_table = 'item_details'
+
 
 class PreOrder(models.Model):
     order_no = models.CharField(max_length = 50, unique = True)
@@ -97,7 +101,7 @@ class Barcode(models.Model):
 
 class ScannedBarcode(models.Model):
 	barcode = models.ForeignKey(Barcode, on_delete=models.CASCADE, null=True, blank=True)
-	scanning_date = models.DateTimeField(default=timezone.now)
+	scanning_date = models.DateTimeField(auto_now_add=True)
 	from_vendor = models.BooleanField(default=0)
 	to_client = models.BooleanField(default=0)
 	to_technician = models.BooleanField(default=0)
@@ -112,6 +116,7 @@ class Stock(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now_add=True)
 	updated_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='updated_by')
+	warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, null=True, blank=True)
 
 	class Meta:
 		db_table = 'stocks'
@@ -122,6 +127,7 @@ class StockLog(models.Model):
 	activity = models.CharField(max_length=20, blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 	created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='log_created_by')
+	warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, null=True, blank=True)
 
 	class Meta:
 		db_table = 'stock_log'

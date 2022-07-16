@@ -120,6 +120,7 @@
 
     });
     var counter = 0;
+    var quantity = {{ so_details.quantity }};
     function scanReq(barcode, so_details){
         $.ajax({
             url : "{% url "scan_for_stock_out" %}",
@@ -127,16 +128,20 @@
             dataType: "JSON",
             data : { barcode : barcode, so_details: so_details },
             success : function(response) {
-                console.log(response);
                 if(response['status'] == 'Success'){
                     result = response['bc_data'];
+                    if(parseInt(result['so_detials_qty']) > counter){
+                        $('#scanData').append("<tr><td class='text-center'><input type='hidden' name='barcode' value='"+result['bid']+"'>"+result['barcode']+"</td><td class='text-center'>"+result['item_name']+"</td><td class='text-center'>"+result['client']+"</td><td class='text-center'>"+result['warehouse']+"</td><td class='text-center'><input type='hidden' name='stock_out_date' readonly value='"+result['stock_out_date']+"'>"+result['stock_out_date']+"</td><td><button class='btn btn-sm btn-danger dltBC' data-bcb='"+result['barcode']+"'>X</button></td></tr>");
 
-                    $('#scanData').append("<tr><td class='text-center'><input type='hidden' name='barcode' value='"+result['bid']+"'>"+result['barcode']+"</td><td class='text-center'>"+result['item_name']+"</td><td class='text-center'>"+result['client']+"</td><td class='text-center'>"+result['warehouse']+"</td><td class='text-center'><input type='hidden' name='stock_out_date' readonly value='"+result['stock_out_date']+"'>"+result['stock_out_date']+"</td><td><button class='btn btn-sm btn-danger dltBC' data-bcb='"+result['barcode']+"'>X</button></td></tr>");
-
-                    $('#Barcode').val("");
-                    counter = counter + 1;
-                    $('#stock_qty').val(counter);
-                    $('#scannedBundleCount').html("Scanned Barcode: "+ counter);
+                        $('#Barcode').val("");
+                        counter = counter + 1;
+                        $('#stock_qty').val(counter);
+                        $('#scannedBundleCount').html("Scanned Barcode: "+ counter);
+                    }
+                    else{
+                        alert('Scanned Quantity is more than ordered quantity');
+                        $('#Barcode').val("");  
+                    }
                 }else if(response['status'] == 'Failure'){
                     alert(barcode +' - this item already scanned for a client');
                     $('#Barcode').val("");

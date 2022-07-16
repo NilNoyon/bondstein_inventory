@@ -1,0 +1,209 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Monthly Inventory Report{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+
+<style>
+    .table td {
+        text-align: center;
+        border: 1px solid #000;
+    }
+    th, th *, td, td *{
+        vertical-align: middle !important;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="panel panel-info">
+              <div class="panel-body">
+                	<select class="form-control m-b-sm" id="month" name="month" style="width: 100%;">
+                      <option value="1">January</option>
+                      <option value="2">February</option>
+                      <option value="3">March</option>
+                      <option value="4">April</option>
+                      <option value="5">May</option>
+                      <option value="6">June</option>
+                      <option value="7">July</option>
+                      <option value="8">August</option>
+                      <option value="9">September</option>
+                      <option value="10">October</option>
+                      <option value="11">November</option>
+                      <option value="12">December</option>
+                  	</select>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="panel panel-info">
+              <div class="panel-body">
+                	<select class="form-control m-b-sm" id="year" name="year" style="width: 100%;">
+                      {% for y in year %}
+                      <option value="{{ y }}">{{y}}</option>
+                      {% endfor %}
+                  	</select>
+              </div>
+            </div>
+          </div>
+          {% if warehouses %}
+          <div class="col-md-6">
+            <div class="panel panel-info">
+              <div class="panel-body">
+                  {% for w in warehouses %}
+                    <div class="col-md-3">
+                      <div class="radio-inline">
+                        <label>
+                          <input type="radio" class="form-control" name="warehouse" id="warehouse" value="{{ w.id }}"><b>{{ w.name }}</b>
+                        </label>
+                      </div>
+                    </div>
+                  {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% else %}
+            <input type="hidden" value="{{ request.user.warehouse_id }}" id="warehouse" name="warehouse">
+          {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Monthly Inventory Report</h4>
+                        <div class="panel-control">
+                            <a href="#" id="export_btn" target="_blank" style="display: none;"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-download"></i> Export as Excel</button></a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="loader" style="display: none;" align="center">
+                          <p><img src="{% static 'images/reload.gif' %}" /></p>
+                        </div>
+                        <div class="table-responsive m-t-sm" id="reportData">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    $('#year').select2({placeholder: "Select Year"});
+    $('#month').select2({placeholder: "Select Month"});
+
+    window.onload = function(){
+        var month = {{current_month}}
+        var year = {{current_year}}
+        var warehouse = $('#warehouse').val();
+        $("#reportData ").empty();
+        if(!warehouse){
+          company = 0;
+        }
+
+        $.ajax({
+              url : "{% url "get_monthly_inventory_report" %}",
+              type: "POST",
+              data: { month : month, year : year, warehouse : warehouse },
+              dataType: 'html',
+              beforeSend: function(){
+                document.getElementById("loader").style.display = "block";
+                $("#loader").show();
+               },
+              success : function(data) {
+                  $('#reportData').html(data)
+                  document.getElementById("export_btn").style.display = "block";
+                  document.getElementById("export_btn").href='/inventory/export-monthly-inventory-report/'+month+'/'+year+'/'+warehouse;
+              },
+              complete:function(data){
+                  document.getElementById("loader").style.display = "block";
+                  $("#loader").hide();
+                 },
+              error: function() {
+                  console.log('Error on loading records');
+              }
+        });
+    }
+
+    $('#month, #year').on('change',function(){
+    	var warehouse = $('#warehouse').val(); // Get the radio checked value
+        var month = $('#month').val();
+        var year = $('#year').val();
+        $("#reportData ").empty();
+        if(!warehouse){
+          warehouse = 0;
+        }
+        $.ajax({
+              url : "{% url "get_monthly_inventory_report" %}",
+              type: "POST",
+              data: { month : month, year : year, warehouse : warehouse },
+              dataType: 'html',
+              beforeSend: function(){
+                document.getElementById("loader").style.display = "block";
+                $("#loader").show();
+               },
+              success : function(data) {
+                  $('#reportData').html(data)
+                  document.getElementById("export_btn").style.display = "block";
+                  document.getElementById("export_btn").href='/inventory/export-monthly-inventory-report/'+month+'/'+year+'/'+warehouse;
+              },
+              complete:function(data){
+                  document.getElementById("loader").style.display = "block";
+                  $("#loader").hide();
+                 },
+              error: function() {
+                  console.log('Error on loading records');
+              }
+        });
+    });
+
+    $(document).on('change', '[type="radio"]', function() {
+        var warehouse = $(this).val(); // Get the radio checked value
+        var month = $('#month').val();
+        var year = $('#year').val();
+        $("#reportData ").empty();
+        if(!warehouse){
+          warehouse = 0;
+        }
+        $.ajax({
+              url : "{% url "get_monthly_inventory_report" %}",
+              type: "POST",
+              data: { month : month, year : year, warehouse : warehouse },
+              dataType: 'html',
+              beforeSend: function(){
+                document.getElementById("loader").style.display = "block";
+                $("#loader").show();
+               },
+              success : function(data) {
+                  $('#reportData').html(data)
+                  document.getElementById("export_btn").style.display = "block";
+                  document.getElementById("export_btn").href='/inventory/export-monthly-inventory-report/'+month+'/'+year+'/'+warehouse;
+              },
+              complete:function(data){
+                  document.getElementById("loader").style.display = "block";
+                  $("#loader").hide();
+                 },
+              error: function() {
+                  console.log('Error on loading records');
+              }
+        });
+      });
+</script>
+{% endblock %}

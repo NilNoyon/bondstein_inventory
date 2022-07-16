@@ -31,13 +31,23 @@
                                    </tr>
                                </thead>
                                <tbody>
-                                   {% for p in stocks %}
-                                   <tr id="po-{{ p.id }}">
-                                       <th scope="row">{{ p.item.name }}</td>
-                                       <th scope="row">{{ p.quantity }}</td>
-                                       <th scope="row">{{ p.updated_at|date:'j F, Y' }}</td>
-                                   </tr>
-                                   {% endfor %}
+                                  {% if stock_data %}
+                                    {% for p in stock_data %}
+                                       <tr id="po-{{ p.id }}">
+                                           <th scope="row">{{ p.item_name }}</td>
+                                           <th scope="row">{{ p.qty }}</td>
+                                           <th scope="row">{{ p.updated_at|date:'j F, Y' }}</td>
+                                       </tr>
+                                     {% endfor %}
+                                  {% else %}
+                                     {% for p in stocks %}
+                                     <tr id="po-{{ p.id }}">
+                                         <th scope="row">{{ p.item.name }}</td>
+                                         <th scope="row">{{ p.quantity }}</td>
+                                         <th scope="row">{{ p.updated_at|date:'j F, Y' }}</td>
+                                     </tr>
+                                     {% endfor %}
+                                  {% endif %}
                                </tbody>
                             </table>
                         </div>

@@ -1,0 +1,171 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Generate Sales Order{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Generate Sales Order</h4>
+                        <div class="panel-control">
+                            <a href="{% url 'so_list' %}"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-list"></i> list</button></a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="m-t-sm">
+                            <form class="m-t-md" id="soForm" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" id="so_id" value="{{ sales_order.id }}">
+                                <input type="hidden" name="fid" id="fid" value="{{ floating_order.id }}">
+                                <div class="row no-m">
+                                    <div class="col-md-5">
+                                        <div class="panel panel-white">
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="client">Client:</label>
+                                                        <input name="client" type="text" class="form-control" id="client" value="{{ client }}" >
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="so_no">Sales Order No:</label>
+                                                            <input name="so_no" type="text" class="form-control" id="so_no" value="{{ so_no }}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="remarks">Remarks:</label>
+                                                            <input name="remarks" type="text" class="form-control" id="remarks" placeholder="Enter Remarks">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="so_date">Sales Order Date:</label>
+                                                            <input name="so_date" type="text" class="form-control date-picker" id="so_date" placeholder="Enter SO Date..." value="{{date|date:'m/d/Y'}}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                    	<div class="form-group">
+                                                    		<label for="delivery_person">Delivery Person:</label>
+	                                                        <input type="text" class="form-control m-b-sm delivery_person" value="{{floating_order.delivery_person}}" id="delivery_person" name="delivery_person" required readonly>
+                                                    	</div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="panel panel-white">
+                                            <div class="panel-body">
+                                                <div class="row duplicateMe">
+                                                    <div class="col-md-5">
+                                                    	<div class="form-group">
+	                                                        <select class="form-control m-b-sm item_details" id="item_details" name="item_details">
+	                                                            <option value="">Select An Item</option>
+	                                                            {% for item in fo_details %}
+	                                                            	<option value="{{ item.item_details_id }}">{{ item.item_details.name }}</option>
+	                                                            {% endfor %}
+	                                                        </select>
+	                                                    </div>
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <div class="form-group">
+                                                            <select class="form-control m-b-sm barcode" id="barcode" name="barcode">
+                                                                <option value="">Select Barcode</option>
+                                                                {% for item in fo_details %}
+                                                                    <option value="{{ item.barcode_id }}">{{ item.barcode.barcode }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <button type="button" class="btn btn-success" style="margin-top: 1px;" id="repeat"><i class="fa fa-plus"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-success btn-block" style="margin-top: 120px;"><h4>Save Information</h4></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // Select2
+    $('.barcode').select2({placeholder: "Select Barcode"});
+    $('.item_details').select2({placeholder: "Select Item"});
+
+    // DatePicker
+    $('.date-picker').datepicker({
+        orientation: "top auto",
+        autoclose: true,
+        todayBtn: 'linked',
+        startDate: new Date()
+    });
+
+
+
+    // Duplicate Form Data
+    $('body').on('click', '#repeat', function(){
+        $duplicate = $('.duplicateMe');
+
+        $duplicate.find('span').remove();
+
+        var clone = $duplicate.html();
+		$('.duplicateMe').parent().append('<div class="row duplicateMe">'+clone+'</div>');
+        $('.item_details').select2({placeholder: "Select Item ..", width: '100%', width: '100%'});
+		$('.barcode').select2({placeholder: "Select Barcode ..", width: '100%', width: '100%'});
+        $(this).parent().append('<button type="button" class="btn btn-danger" style="margin-top: 1px;" id="remove"><i class="fa fa-close"></i></button>');
+        $(this).remove();
+        $duplicate.removeClass('duplicateMe');
+    });
+
+    // Remove Form data
+    $('body').on('click', '#remove', function(){
+        $(this).parent().parent().remove();
+    });
+
+    function price_calculation() {
+        var price = document.querySelectorAll('.price');
+        var totals = 0;
+
+        //Sum calculation
+        for (var i = 0; i <price.length; i++)
+        {
+          totals = totals + Number(price[i].value);
+        }
+        document.getElementById('so_amount').value = parseInt(totals);
+    }
+
+</script>
+{% endblock %}

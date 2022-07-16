@@ -7,6 +7,8 @@
 {% block css %}
 <link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
 <link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+
 {% endblock %}
 
 
@@ -96,7 +98,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="user_warehouse">Warehouse:</label>
-                                    <select class="form-control m-b-sm warehouse" id="user_warehouse" name="warehouse">
+                                    <select class="form-control m-b-sm warehouse" id="user_warehouse" name="warehouse" required>
                                         <option value="">Select A Warehouse</option>
                                         {% for warehouse in warehouses %}
                                         <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
@@ -109,7 +111,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="user_role">User Role:</label>
-                                    <select class="form-control m-b-sm role" id="user_role" name="role">
+                                    <select class="form-control m-b-sm role" id="user_role" name="role" required>
                                         <option value="">Select A User Role</option>
                                         {% for role in roles %}
                                         <option value="{{ role.id }}">{{ role.name }}</option>
@@ -158,8 +160,8 @@
 <script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
 <script src="{% static 'plugins/select2/js/select2.js' %}"></script>
 <script>
-    // $('.role').select2();
-    // $('.warehouse').select2();
+    // $('.role').select2({placeholder: "Select Role"});
+    // $('.warehouse').select2({placeholder: "Select Warehouse"});
 
     $("body").on("click", "#user_active", function () {
         var two = $(this).attr("checked", this.checked);
@@ -183,7 +185,6 @@
             type : "POST",
             data : { id : id },
             success : function(data) {
-                console.log(data['type']);
                 $('#user_id').val(id);
                 $('#username').val(data['username']);
                 $('#fullname').val(data['fullname']);
@@ -221,7 +222,6 @@
                 type : "POST",
                 data : { id : id },
                 success : function(data) {
-                    console.log(data);
                     $('#user-'+id).hide();
                     toastr.options = {
                         closeButton: true,

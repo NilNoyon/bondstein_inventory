@@ -9,7 +9,7 @@ urlpatterns = [
 
     path('add-supplier', views.addSupplier, name='add_supplier'),
     path('get-supplier', views.getSupplier, name='get_supplier'),
-    path('update-supplier', views.updateSupplier, name='update_supplier'),
+    path('update-supplier/<int:id>', views.updateSupplier, name='update_supplier'),
     path('delete-supplier', views.deleteSupplier, name='delete_supplier'),
 
     # items and categories...
@@ -47,14 +47,17 @@ urlpatterns = [
     path('generate-manual-barcode', views.generateManualBarcode, name='generate_manual_barcode'),
     path('scan-barcode', views.scan, name='scan_barcode'),
     path('barcode-list', views.barcodeList, name='barcode_list'),
-    path('barcode-details/<generate_id>', views.barcodeDetails, name='barcode_details'),
-    path('barcode-pdf/<generate_id>', views.barcodeDetailsPDF, name='barcode_pdf'),
+    path('barcode-details/<po_details>/<item_name>', views.barcodeDetails, name='barcode_details'),
+    path('barcode-pdf/<po_details>/<item_name>', views.barcodeDetailsPDF, name='barcode_pdf'),
 
     ## stock list..
     path('stock-list', views.stockList, name='stock_list'),
     path('stock-log', views.stockLog, name='stock_log'),
     path('scanned-product-list', views.scannedProductList, name='scanned_product_list'),
     path('stock-in/<int:id>', views.stockIn, name='stock_in'),
+    path('scanned-product-details/<order_no>/<item_name>', views.scannedProductDetailList, name='scanned_product_details'),
+    path('item-wise-scanned', views.scannedItemBarcode, name='scanned_item_barcode'),
+    path('get-item-wise-scanned', views.getScannedItemBarcode, name='get_item_wise_scanned_product'),
     # path('generate-barcode/<int:id>', views.generateBarcode, name='generate_barcode'),
     path('scan-form-barcode', views.scanBCB, name='scan_form_bcb'),
     path('store-scan-data', views.storeScanData, name='store_scan_data'),

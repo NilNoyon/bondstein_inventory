@@ -1,0 +1,207 @@
+<div class="row" id="singleData">
+    <div class="col-lg-2 col-md-4">
+        <div class="panel info-box panel-white">
+            <div class="panel-body">
+                <div class="info-box-stats">
+                    <p><text class="counter">{{ total_po }}</text>/<text class="counter">{{ total_item }}</text></p>
+                    <span class="info-box-title">Total PO/PO Wise Item</span>
+                </div>
+                <div class="info-box-icon">
+                    <i class="icon-users"></i>
+                </div>
+                <div class="info-box-progress">
+                    <div class="progress progress-xs progress-squared bs-n">
+                        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4">
+        <div class="panel info-box panel-white">
+            <div class="panel-body">
+                <div class="info-box-stats">
+                    <p><text class="counter">{{ total_so }}</text>/<text class="counter">{{ total_so_item }}</text></p>
+                    <span class="info-box-title">Total SO/SO Wise Item</span>
+                </div>
+                <div class="info-box-icon">
+                    <i class="icon-folder"></i>
+                </div>
+                <div class="info-box-progress">
+                    <div class="progress progress-xs progress-squared bs-n">
+                        <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4">
+        <div class="panel info-box panel-white">
+            <div class="panel-body">
+                <div class="info-box-stats">
+                    <p><text class="counter">{{ total_sto }}</text>/<text class="counter">{{ total_sto_item }}</text></p>
+                    <span class="info-box-title">Total STO/STO Wise Item</span>
+                </div>
+                <div class="info-box-icon">
+                    <i class="icon-doc"></i>
+                </div>
+                <div class="info-box-progress">
+                    <div class="progress progress-xs progress-squared bs-n">
+                        <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4">
+        <div class="panel info-box panel-white">
+            <div class="panel-body">
+                <div class="info-box-stats">
+                    <p><text class="counter">{{ total_fo }}</text>/<text class="counter">{{ total_fo_item }}</text></p>
+                    <span class="info-box-title">Total Floating / Item</span>
+                </div>
+                <div class="info-box-icon">
+                    <i class="icon-doc"></i>
+                </div>
+                <div class="info-box-progress">
+                    <div class="progress progress-xs progress-squared bs-n">
+                        <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4">
+        <div class="panel info-box panel-white">
+            <div class="panel-body">
+                <div class="info-box-stats">
+                    <p class="counter">{{ total_item }}</p>
+                    <span class="info-box-title">Total Item</span>
+                </div>
+                <div class="info-box-icon">
+                    <i class="fa fa-cubes"></i>
+                </div>
+                <div class="info-box-progress">
+                    <div class="progress progress-xs progress-squared bs-n">
+                        <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4">
+        <div class="panel info-box panel-white">
+            <div class="panel-body">
+                <div class="info-box-stats">
+                    <p class="counter">{{ total_warehouse }}</p>
+                    <span class="info-box-title">Total Warehouse</span>
+                </div>
+                <div class="info-box-icon">
+                    <i class="fa fa-university"></i>
+                </div>
+                <div class="info-box-progress">
+                    <div class="progress progress-xs progress-squared bs-n">
+                        <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Row -->
+<div class="row" id="multipleData">
+    <div class="col-lg-4 col-md-12">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h4 class="panel-title">Stock In Status</h4>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive project-stats">
+                    <table class="table table-hover table-striped table-border" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="50%">#</th>
+                                <th width="50%">Vendor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockInTable">
+                          {% for cdata in stock_in %}
+                            <tr>
+                                <th>{{ cdata.slug }}</th>
+                                <td>
+                                    {{ cdata.quantity}}
+                                  
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-12">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h4 class="panel-title">Stock Out Status</h4>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive project-stats">
+                    <table class="table table-hover table-striped table-border" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="50%">#</th>
+                                <th width="50%">Client</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockOutTable">
+                            {% for cdata in stock_out %}
+                            <tr>
+                                <th>{{ cdata.slug }}</th>
+                                <td>
+                                    {{ cdata.quantity}}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-12">
+        <div class="panel panel-danger">
+            <div class="panel-heading">
+                <h4 class="panel-title">Damage Status</h4>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive project-stats">
+                    <table class="table table-hover table-striped table-border" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="50%">#</th>
+                                <th width="50%">Damage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="damageTable">
+                            {% for cdata in damage %}
+                            <tr>
+                                <th>{{ cdata.slug }}</th>
+                                <td>
+                                    {{ cdata.quantity}}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
