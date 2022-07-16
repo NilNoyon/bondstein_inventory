@@ -1,0 +1,214 @@
+<table class="table table-hover table-bordered">
+  <tbody>
+    <tr>
+      <th>Total Stock In</th>
+      <th class="text-center">{{result.total_stock_in}}</th>
+      <th>Total Stock Out</th>
+      <th class="text-center">{{result.total_stock_out}}</th>
+      <th>Total Floating</th>
+      <th class="text-center">{{result.total_float}}</th>
+      <th>Total Damage</th>
+      <th class="text-center">{{result.total_damage}}</th>
+    </tr>
+  </tbody>
+</table>
+<div class="col-md-3">
+  <div class="panel info-box panel-white">
+      <div class="panel-heading">
+          <h4 class="panel-title">Stock In Item</h4>
+      </div>
+      <div class="panel-body">
+          <div class="table-responsive project-stats">
+              <table class="table table-hover table-striped table-border" width="100%">
+                  <thead>
+                      <tr>
+                          <th width="20%">#</th>
+                          <th width="50%">Item</th>
+                          <th width="30%">Qty</th>
+                      </tr>
+                  </thead>
+                  <tbody id="stockInTable">
+                    {% for cdata in result.stock_in %}
+                      <tr>
+                          <th>{{ forloop.counter }}</th>
+                          <th>{{ cdata.item_name }}</th>
+                          <th>{{ cdata.total_scanned }}</th>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+              </table>
+              {% if result.stock_in %}
+                <h4>Barcodes</h4>
+                <table class="table table-hover table-striped table-border" width="100%">
+                    <thead>
+                        <tr>
+                            <th width="50%">Item Name</th>
+                            <th width="50%">Barcode</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockInTable">
+                      {% for cdata in result.stock_in %}
+                        {% for b in cdata.barcodes %}
+                          <tr>
+                              <th>{{ cdata.item_name }}</th>
+                              <th>{{ b.barcode.barcode }}</th>
+                          </tr>
+                        {% endfor %}
+                      {% endfor %}
+                    </tbody>
+                </table>
+              {% endif %}
+          </div>
+      </div>
+  </div>
+</div>
+<div class="col-md-3">
+  <div class="panel info-box panel-white">
+      <div class="panel-heading">
+          <h4 class="panel-title">Stock Out Item</h4>
+      </div>
+      <div class="panel-body">
+          <div class="table-responsive project-stats">
+              <table class="table table-hover table-striped table-border" width="100%">
+                  <thead>
+                      <tr>
+                          <th width="20%">#</th>
+                          <th width="50%">Item</th>
+                          <th width="30%">Qty</th>
+                      </tr>
+                  </thead>
+                  <tbody id="stockInTable">
+                    {% for cdata in result.stock_out %}
+                      <tr>
+                          <th>{{ forloop.counter }}</th>
+                          <th>{{ cdata.item_name }}</th>
+                          <th>{{ cdata.total_scanned }}</th>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+              </table>
+              {% if result.stock_out %}
+                <h4>Barcodes</h4>
+                <table class="table table-hover table-striped table-border" width="100%">
+                    <thead>
+                        <tr>
+                            <th width="50%">Item Name</th>
+                            <th width="50%">Barcode</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockInTable">
+                      {% for cdata in result.stock_out %}
+                        {% for b in cdata.barcodes %}
+                          <tr>
+                              <th>{{ cdata.item_name }}</th>
+                              <th>{{ b.barcode.barcode }}</th>
+                          </tr>
+                        {% endfor %}
+                      {% endfor %}
+                    </tbody>
+                </table>
+              {% endif %}
+          </div>
+      </div>
+  </div>
+</div>
+<div class="col-md-3">
+  <div class="panel info-box panel-white">
+      <div class="panel-heading">
+          <h4 class="panel-title">Stock Float Item</h4>
+      </div>
+      <div class="panel-body">
+          <div class="table-responsive project-stats">
+              <table class="table table-hover table-striped table-border" width="100%">
+                  <thead>
+                      <tr>
+                          <th width="20%">#</th>
+                          <th width="50%">Item</th>
+                          <th width="30%">Qty</th>
+                      </tr>
+                  </thead>
+                  <tbody id="stockInTable">
+                    {% for cdata in result.floats %}
+                      <tr>
+                          <th>{{ forloop.counter }}</th>
+                          <th>{{ cdata.item_name }}</th>
+                          <th>{{ cdata.total_scanned }}</th>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+              </table>
+              {% if result.floats %}
+                <h4>Barcodes</h4>
+                <table class="table table-hover table-striped table-border" width="100%">
+                    <thead>
+                        <tr>
+                            <th width="50%">Item Name</th>
+                            <th width="50%">Barcode</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockInTable">
+                      {% for cdata in result.floats %}
+                        {% for b in cdata.barcodes %}
+                          <tr>
+                              <th>{{ cdata.item_name }}</th>
+                              <th>{{ b.barcode.barcode }}</th>
+                          </tr>
+                        {% endfor %}
+                      {% endfor %}
+                    </tbody>
+                </table>
+              {% endif %}
+          </div>
+      </div>
+  </div>
+</div>
+<div class="col-md-3">
+  <div class="panel info-box panel-white">
+      <div class="panel-heading">
+          <h4 class="panel-title">Stock Damage Item</h4>
+      </div>
+      <div class="panel-body">
+          <div class="table-responsive project-stats">
+              <table class="table table-hover table-striped table-border" width="100%">
+                  <thead>
+                      <tr>
+                          <th width="20%">#</th>
+                          <th width="50%">Item</th>
+                          <th width="30%">Qty</th>
+                      </tr>
+                  </thead>
+                  <tbody id="stockInTable">
+                    {% for cdata in result.damage %}
+                      <tr>
+                          <th>{{ forloop.counter }}</th>
+                          <th>{{ cdata.item_name }}</th>
+                          <th>{{ cdata.total_scanned }}</th>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+              </table>
+              {% if result.damage %}
+                <h4>Barcodes</h4>
+                <table class="table table-hover table-striped table-border" width="100%">
+                    <thead>
+                        <tr>
+                            <th width="50%">Item Name</th>
+                            <th width="50%">Barcode</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockInTable">
+                      {% for cdata in result.damage %}
+                        {% for b in cdata.barcodes %}
+                          <tr>
+                              <th>{{ cdata.item_name }}</th>
+                              <th>{{ b.barcode.barcode }}</th>
+                          </tr>
+                        {% endfor %}
+                      {% endfor %}
+                    </tbody>
+                </table>
+              {% endif %}
+          </div>
+      </div>
+  </div>
+</div>

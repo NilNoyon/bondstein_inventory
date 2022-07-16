@@ -1,0 +1,10 @@
+{% for i in stock_infos %}
+    <tr>
+        <td class="text-center">{{ i.barcode.barcode }}</td>
+        <td class="text-center">{{ i.barcode.po_details.item_details.name }}</td>
+        <td class="text-center">{{ i.barcode.po_details.item_details.unit_price }}</td>
+        <td class="text-center">{{ i.barcode.po_details.supplier.name|default:"N/A" }}</td>
+        <td class="text-center">{{ i.barcode.warehouse.name }}s</td>
+        <td class="text-center">{{ i.scanning_date|date:"j-m-Y" }}</td>
+    </tr>
+{% endfor %}

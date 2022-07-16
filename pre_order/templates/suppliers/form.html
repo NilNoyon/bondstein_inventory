@@ -1,0 +1,116 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Generate Barcode{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+
+<style>
+    .table td {
+        text-align: center;
+        border: 1px solid #000;
+    }
+    th, th *, td, td *{
+        vertical-align: middle !important;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+  <div id="main-wrapper" class="container-fluid p-h-lg">
+    <div class="row">
+    	<div class="col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h4 class="panel-title">{{query_action}} Supplier</h4>
+                    <div class="panel-control">
+                        <a href="{% url 'supplier_list' %}"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-list"></i> list</button></a>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="m-t-sm">
+				      	<form class="m-t-md" id="supplierForm" action="{{action}}" method="post">
+					        {% csrf_token %}
+					        <input type="hidden" name="id" id="supplier_id">
+					        <div class="modal-header">
+					            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					            <h4 class="modal-title" id="myModalLabel">Supplier Form</h4>
+					        </div>
+					        <div class="modal-body">
+					            <div class="row">
+					                <div class="col-md-6">
+					                    <div class="form-group">
+					                        <label for="name">Name:</label>
+					                        <input name="name" type="text" class="form-control" id="name" placeholder="Enter Supplier Name..." value="{{supplier.name}}" required>
+					                    </div>
+					                </div>
+					                <div class="col-md-6">
+					                    <div class="form-group">
+					                        <label for="contact">Contact:</label>
+					                        <input name="contact" type="text" class="form-control" id="contact" placeholder="Enter Contact..." value="{{supplier.contact}}" required>
+					                    </div>
+					                </div>
+					            </div>
+					            <div class="row">
+					                <div class="col-md-12">
+					                    <div class="form-group">
+					                        <label for="email">Email:</label>
+					                        <input class="form-control" name="email" id="email" placeholder="Enter email..." value="{{supplier.email}}">
+					                    </div>
+					                </div>
+					            </div>
+					            <div class="row">
+					                <div class="col-md-12">
+					                    <div class="form-group">
+					                        <label for="address">Address:</label>
+					                        <textarea class="form-control" name="address" id="address" placeholder="Enter Address..." value={{supplier.address}}></textarea>
+					                    </div>
+					                </div>
+					            </div>
+					            <div class="row">
+					                <div class="col-md-12">
+					                    <div class="form-group">
+					                        <label for="item">Item:</label>
+					                        <select class="form-control m-b-sm" id="item" name="item" style="width: 100%;" multiple>
+					                              {% for item in items %}
+					                              <option value="{{ item.id }}" {% if item.id in supplier.item.all %} selected {% endif %}>{{ item.name }}</option>
+					                              {% endfor %}
+					                        </select>
+					                    </div>
+					                </div>
+					            </div>
+					        </div>
+					        <hr>
+					        <div class="modal-footer">
+					            <div class="col-md-12">
+					                <button type="submit" class="btn btn-success">Save Information</button>
+					            </div>
+					        </div>
+					    </form>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // Select2
+    $('#item').select2({placeholder: "Select Item"});
+
+</script>
+{% endblock %}

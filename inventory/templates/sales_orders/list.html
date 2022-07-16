@@ -28,12 +28,10 @@
                                    <tr>
                                        <th>SO No.</th>
                                        <th>Client Name</th>
-                                       <th>Client Contact</th>
-                                       <th>Responsible Person</th>
+                                       <th>Delivery Person</th>
                                        <th>SO Date</th>
                                        <th>SO Qty</th>
-                                       <!-- <th>SO Grand Total</th> -->
-                                       <th>Status</th>
+                                       <!-- <th>Status</th> -->
                                        <th>Action</th>
                                    </tr>
                                </thead>
@@ -41,19 +39,17 @@
                                    {% for p in sales_orders %}
                                    <tr id="so-{{ p.id }}">
                                        <th scope="row">{{ p.so_no }}</td>
-                                       <th scope="row">{{ p.client.name }}</td>
-                                       <th scope="row">{{ p.client.contact }}</td>
-                                       <th scope="row">{{ p.responsible_person.name }}</td>
+                                       <th scope="row">{{ p.client }}</td>
+                                       <th scope="row">{{ p.delivery_person|upper }}</td>
                                        <th scope="row">{{ p.so_date|date:'j F, Y' }}</td>
                                        <th scope="row">{{ p.total_qty }}</td>
-                                       <!-- <th scope="row">{{ p.so_amount }}</td> -->
-                                       <th scope="row">
+                                       <!-- <th scope="row">
                                           {% if p.is_stock_out == False %}
                                             <button type="button" class="btn btn-danger btn-xs">In Transit</button>
                                           {% else %}
                                             <button type="button" class="btn btn-success btn-xs">Stock Out</button>
                                           {% endif %}
-                                       </td>
+                                       </td> -->
                                        <td scope="row" class="m-h-xs">
                                            <!-- <a href="#"><button class="btn btn-success btn-xs"><i class="fa fa-edit"></i></button></a> -->
                                            <a type="button" class="btn btn-success btn-xs" href="{% url 'so_details' p.id %}"><i class="fa fa-eye"></i> view</a>

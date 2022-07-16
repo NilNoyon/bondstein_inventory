@@ -32,8 +32,9 @@
                                        <th>Challan Date</th>
                                        <th>Created By</th>
                                        <th>Remarks</th>
-                                       <th>From Warehouse Out</th>
-                                       <th>To Warehouse Out</th>
+                                       <th>Delivery Person</th>
+                                       <!-- <th>From Warehouse Out</th> -->
+                                       <th>To Warehouse Receive</th>
                                        <th>Action</th>
                                    </tr>
                                </thead>
@@ -46,13 +47,14 @@
                                        <th scope="row">{{ p.created_by.fullname }}</td>
                                        <th scope="row">{{ p.created_at|date:'j F, Y' }}</td>
                                        <th scope="row">{{ p.remarks }}</td>
-                                       <th scope="row">
+                                       <th scope="row">{{ p.delivery_person|upper }}</td>
+                                       <!-- <th scope="row">
                                           {% if p.is_warehouse_out == False %}
                                             <button type="button" class="btn btn-danger btn-xs">Not Yet</button>
                                           {% else %}
                                             <button type="button" class="btn btn-success btn-xs">Yes</button>
                                           {% endif %}
-                                       </td>
+                                       </td> -->
                                        <th scope="row">
                                           {% if p.is_received == False %}
                                             <button type="button" class="btn btn-danger btn-xs">Not Yet</button>
@@ -62,9 +64,9 @@
                                        </td>
                                        <td scope="row" class="m-h-xs">
                                            <!-- <a href="#"><button class="btn btn-success btn-xs"><i class="fa fa-edit"></i></button></a> -->
-                                           <a type="button" class="btn btn-success btn-xs" href="{% url 'so_details' p.id %}"><i class="fa fa-eye"></i> view</a>
-                                           <a href="{% url 'so_detail_list' p.id %}"><button class="btn btn-success btn-xs"><i class="fa fa-database"></i></button></a>
-                                           <button type="button" class="btn btn-google btn-xs" id="deleteSO" data-id="{{ p.id }}"><i class="fa fa-close"></i></button>
+                                           <a type="button" class="btn btn-success btn-xs" href="{% url 'sto_details' p.id %}"><i class="fa fa-eye"></i> view</a>
+                                           <a href="{% url 'sto_detail_list' p.id %}"><button class="btn btn-success btn-xs"><i class="fa fa-database"></i></button></a>
+                                           <button type="button" class="btn btn-google btn-xs" id="deleteSTO" data-id="{{ p.id }}"><i class="fa fa-close"></i></button>
                                        </td>
                                    </tr>
                                    {% endfor %}
@@ -94,15 +96,15 @@
     });
 
 
-    $("#soTable").on('click', '#deleteSO', function(){
+    $("#soTable").on('click', '#deleteSTO', function(){
         var id = $(this).data('id');
         if (confirm('are you sure you want to remove this Sales Order?')==true){
             $.ajax({
-                url : "{% url 'delete_so' %}",
+                url : "{% url 'delete_sto' %}",
                 type : "POST",
                 data : { id : id },
                 success : function(data) {
-                    $('#so-'+id).hide();
+                    $('#sto-'+id).hide();
                     toastr.options = {
                         closeButton: true,
                         progressBar: true,

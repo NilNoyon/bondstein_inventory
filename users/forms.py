@@ -27,10 +27,4 @@ class UserUpdateForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'fullname', 'email', 'is_active', 'designation','role','date_joined','warehouse')
-
-    def __init__(self, *args, **kwargs):
-        super(UserUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['password'].required = False
-        self.fields['designation'].required = False
-        self.fields['date_joined'].required = False
+        fields = ('username', 'fullname', 'email', 'is_active', 'designation','role','warehouse')

@@ -1,0 +1,220 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Add Floating Item{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Add Floating Item</h4>
+                        <div class="panel-control">
+                            <a href="{% url 'fi_list' %}"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-list"></i> list</button></a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="m-t-sm">
+                            <form class="m-t-md" id="foForm" action="{% url 'add_fo' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" id="fo_id" value="">
+                                <div class="row no-m">
+                                    <div class="col-md-5">
+                                        <div class="panel panel-white">
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="order_no">Floating Order No:</label>
+                                                            <input name="order_no" type="text" class="form-control" id="order_no" value="{{ order_no }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="takeover_date">Date:</label>
+                                                            <input name="takeover_date" type="text" class="form-control date-picker" id="takeover_date" placeholder="Enter Date..." value="{{date|date:'m/d/Y'}}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="remarks">Remarks:</label>
+                                                            <input name="remarks" type="text" class="form-control" id="remarks" placeholder="Enter Remarks">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="delivery_person">Delivery Person</label>
+                                                            <input name="delivery_person" type="text" class="form-control" id="delivery_person" value="{{ delivery_person }}">
+                                                        </div>
+                                                    </div>
+                                                	<div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="phone_no">Phone No</label>
+                                                            <input name="phone_no" type="text" class="form-control" id="phone_no" value="{{ phone_no }}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                            </form>
+                                    <div class="col-md-7">
+                                        <div class="panel panel-white">
+                                            <div class="panel-body">
+                                            	<form method="post" class="m-t-lg" action="" id="scanForm">
+						                            {% csrf_token %}
+						                            <div class="row">
+						                                <div class="col-md-4">
+						                                    <div class="form-group text-center">
+						                                        <input id="Barcode" class="form-control input-lg" type="text" autofocus name="barcode" placeholder="Enter Barcode ...">
+						                                    </div>
+						                                </div>
+						                                <div class="col-md-6">
+						                                    <div class="text-left">
+						                                        <h3>
+						                                            <span class="text-success" id="scannedBundleCount"></span>
+						                                        </h3>
+						                                    </div>
+						                                </div>
+						                            </div>
+						                        </form>
+                                                <div class="table-responsive m-t-sm">
+					                            <table class="table table-hover table-bordered" id="bcTable">
+					                               <thead>
+					                                   <tr>
+					                                       <th class="text-center">Product Barcode</th>
+					                                       <th class="text-center">Item Name</th>
+					                                       <th style="width: 25px">Action</th>
+					                                   </tr>
+					                               </thead>
+					                               <tbody id="scanData">
+					                               </tbody>
+					                            </table>
+					                        </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-success btn-block" id="submit_btn"><h4>Save Information</h4></button>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // DatePicker
+    $('.date-picker').datepicker({
+        orientation: "top auto",
+        autoclose: true,
+        todayBtn: 'linked',
+        startDate: new Date()
+    });
+
+    $( document ).ready(function() {
+	    $('#submit_btn').on('click', function(){
+	    	$("#foForm").submit();
+	    });
+	});
+
+    var bcArray = new Array();
+    $('#scanForm').on('submit', function(e){
+
+        e.preventDefault();
+
+        var barcode = $('#Barcode').val();
+        var matched = 0;
+
+        if(bcArray.length == 0){
+            bcArray.push(barcode);
+            scanReq(barcode);
+        }else{
+            for(var i=0; i<=bcArray.length; i++){
+                if(bcArray[i] == barcode){
+                    matched = 1;
+                }
+            }
+
+            if(matched == 1){
+                alert('Already Scanned!');
+                $('#Barcode').val("");
+            }else{
+                scanReq(barcode);
+                bcArray.push(barcode);
+            }
+        }
+
+    });
+    var counter = 0;
+    function scanReq(barcode){
+        $.ajax({
+            url : "{% url "scan_for_floating" %}",
+            type : "POST",
+            dataType: "JSON",
+            data : { barcode : barcode},
+            success : function(response) {
+                console.log(response);
+                if(response['status'] == 'Success'){
+                    result = response['bc_data'];
+
+                    $('#scanData').append("<tr><td class='text-center'><input type='hidden' name='barcode' value='"+result['bid']+"'>"+result['barcode']+"</td><td class='text-center'><input type='hidden' name='item_details' value='"+result['item_details']+"'>"+result['item_name']+"</td><td><button class='btn btn-sm btn-danger dltBC' data-bcb='"+result['barcode']+"'>X</button></td></tr>");
+
+                    $('#Barcode').val("");
+                    counter = counter + 1;
+                    $('#scannedBundleCount').html("Scanned Barcode: "+ counter);
+                }else if(response['status'] == 'Client'){
+                    alert(barcode +' - this item already scanned for a client');
+                    $('#Barcode').val("");
+               	}else if(response['status'] == 'Damage'){
+                    alert(barcode +' - this item is damage');
+                    $('#Barcode').val("");
+                }else if(response['status'] == 'Technician'){
+                    alert(barcode +' - this item already scanned for another delivery person');
+                    $('#Barcode').val("");
+                }
+                else if(response['status'] == 'Not Found'){
+                    alert(barcode +' - this item not found');
+                    $('#Barcode').val("");
+                }else if(response['status'] == 'Not Exists'){
+                    alert(barcode +' - this barcode not exists');
+                    $('#Barcode').val("");
+                }
+            }
+        });
+    }
+
+
+    $('body').on('click', '.dltBC', function(e){
+        bcArray.pop($(this).data('bcb'));
+        $(this).parent().parent().remove();
+        counter = counter - 1;
+        $('#scannedBundleCount').html(" "+ counter);
+    });
+
+</script>
+{% endblock %}

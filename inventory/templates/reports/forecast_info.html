@@ -1,0 +1,195 @@
+<div class="table-responsive m-t-sm">
+	<div class="col-md-6">
+		<table class="table table-hover table-bordered">
+			<thead>
+				{% if item_name %}
+					<th>Month</th>
+					{% for val in item_name %}
+						<th>{{ val }}</th>
+					{% endfor %}
+					<th> Total </th>
+				{% endif %}
+			</thead>
+			<tbody>
+				{% if result %}
+					{% for i in result %}
+						<tr>
+							<td>{{ i.month }}'{{ i.year }}</td>
+							{% for val in i.datas %}
+							<td>{{ val }}</td>
+							{% endfor %}
+							<td> {{ i.total }} </td>
+						</tr>
+					{% endfor %}
+				{% endif %}
+				{% if total_data %}
+					{% for i in total_data %}
+						<tr>
+							<td>{{ i.month }}</td>
+							{% for val in i.data %}
+							<td>{{ val }}</td>
+							{% endfor %}
+							<td> {{ i.total }} </td>
+						</tr>
+					{% endfor %}
+				{% endif %}
+			</tbody>
+		</table>
+		<input type="hidden" id="item_name" value="{{ item_name }}">
+		<input type="hidden" id="item_qty" value="{{ result }}">
+	</div>
+	<div class="col-md-6">
+	   <div id="top_x_div" style="width: 400px; height: 300px;"></div>
+	</div>
+</div>
+<div class="table-responsive m-t-sm">
+	<div class="col-md-12">
+		<table class="table table-hover table-bordered">
+			<thead>
+				<tr>
+					<h4 style="font-weight: 700;">Summary</h4>
+				</tr>
+				<tr>
+					<th>Stock Asset Value</th>
+					<th colspan="{{item_name|length}}">{{ price }} - BDT</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td></td>
+					{% for i in item_name %}
+						<td>{{ i }}</td>
+					{% endfor %}
+				</tr>
+				<tr>
+					<td>Unit Price</td>
+					{% for i in unit_price %}
+						<td>{{ i }}</td>
+					{% endfor %}
+				</tr>
+				<tr>
+					<td>Quantity</td>
+					{% for i in quantity %}
+						<td>{{ i }}</td>
+					{% endfor %}
+				</tr>
+				<tr>
+					<td>Total Asset Value</td>
+					{% for i in total_asset %}
+						<td>{{ i }}</td>
+					{% endfor %}
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="col-md-12">
+		<table class="table table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>Intransit Asset Value</th>
+					<th colspan="{{item_name|length}}">{{ intransit_price }} - BDT</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td></td>
+					{% for i in item_name %}
+						<td>{{ i }}</td>
+					{% endfor %}
+				</tr>
+				<tr>
+					<td>Unit Price</td>
+					{% for i in unit_price %}
+						<td>{{ i }}</td>
+					{% endfor %}
+				</tr>
+				<tr>
+					<td>Quantity</td>
+					{% for i in in_transit_qty %}
+						<td>{{ i }}</td>
+					{% endfor %}
+				</tr>
+				<tr>
+					<td>Total asset value</td>
+					{% for i in intransit_asset %}
+						<td>{{ i }}</td>
+					{% endfor %}
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="col-md-12">
+		<table class="table table-hover table-bordered">
+			<thead>
+				<tr>
+					<th rowspan="2">Demand Type</th>
+					<th colspan="{{item_name|length}}">Items</th>
+					<th rowspan="2">Remarks</th>
+				</tr>
+				<tr>
+					{% for i in item_name %}
+						<th>{{ i }}</th>
+					{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Forecast Demand</td>
+					{% for i in forecast_value %}
+						<td>{{ i }}</td>
+					{% endfor %}
+					<td></td>
+				</tr>
+				<tr>
+					<td>Additional Channel Demand</td>
+					{% for i in additional_demand %}
+						<td>{{ i }}</td>
+					{% endfor %}
+					<td></td>
+				</tr>
+				<tr>
+					<td>Buffer(2%)</td>
+					{% for i in buffer %}
+						<td>{{ i }}</td>
+					{% endfor %}
+					<td></td>
+				</tr>
+				<tr>
+					<td>Total Demand</td>
+					{% for i in total_demand %}
+						<td>{{ i }}</td>
+					{% endfor %}
+					<td></td>
+				</tr>
+				<tr>
+					<td>In Stock</td>
+					{% for i in quantity %}
+						<td>{{ i }}</td>
+					{% endfor %}
+					<td></td>
+				</tr>
+				<tr>
+					<td>In Process</td>
+					{% for i in quantity %}
+						<td></td>
+					{% endfor %}
+					<td></td>
+				</tr>
+				<tr>
+					<td>Required Quantity</td>
+					{% for i in required_qty %}
+						<td>{{ i }}</td>
+					{% endfor %}
+					<td></td>
+				</tr>
+				<tr>
+					<td>RFQ Call</td>
+					{% for i in quantity %}
+						<td></td>
+					{% endfor %}
+					<td></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

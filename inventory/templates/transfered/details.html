@@ -1,0 +1,184 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Sales Order Details - {{ stc.challan_no }}{% endblock %}
+
+
+{% block css %}
+<style>
+    .table th,
+    .table td {
+        text-align: center;
+        border: 1px solid #000 !important;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+    th, th *, td, td *{
+        vertical-align: middle !important;
+    }
+
+    @font-face {
+        font-family: 'Code139';
+        src: url('{% static "css/barcode.TTF" %}')  format('truetype');
+    }
+
+    @media print {
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+        body {
+            background-color: #fff;
+            font-size: 10px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+        }
+        body * {
+            visibility: hidden;
+        }
+        #section-to-print, #section-to-print * {
+            visibility: visible;
+        }
+        #section-to-print {
+            position: fixed;
+            margin-top: 0px;
+            padding-top: 0px;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+
+        .page-inner{
+            padding: 0px !important;
+        }
+
+        .table > tbody > tr > td, 
+        .table > tfoot > tr > td, 
+        .table > thead > tr > td, 
+        .table td {
+            padding-top: 5px !important;
+            padding-bottom: 5px !important;
+        }
+
+        .table > tbody > tr > th, 
+        .table > tfoot > tr > th, 
+        .table > thead > tr > th {
+            padding-top: 5px !important;
+            padding-bottom: 5px !important;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Stock Transfer Challan</h4>
+                        <div class="panel-control">
+                            <button style="margin-left: 4px" onclick="printFunction()" class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-print"></i> Print </button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="m-t-sm" id="section-to-print">
+                            <h3 class="text-center">
+                            	Bondstein Technologies Ltd.
+                            </h3>
+                            <br><br>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <h4 class="text-left">{{ stc.created_at|date:"jS F, Y H:i A" }}</h4>
+                                    <h4 class="text-left">STO No : {{ stc.challan_no }}</h4>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <p class="text-left"><b>From Warehouse:</b></p>
+                                    <p class="text-left">{{ stc.from_warehouse.name|upper}}</p>
+                                    <p class="text-left">{{ stc.from_warehouse.address }}</p>
+                                    <p class="text-left">Contact : {{ stc.from_warehouse.contact }}</p>
+                                </div>
+                                <div class="col-xs-6">
+                                    <p class="text-right"><b>To Warehouse:</b></p>
+                                    <p class="text-right">{{ stc.to_warehouse.name|upper}}</p>
+                                    <p class="text-right">{{ stc.to_warehouse.address }}</p>
+                                    <p class="text-right">Contact : {{ stc.to_warehouse.contact }}</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="table-responsive m-t-sm">
+                                <table class="table table-hover" id="Table">
+                                    <thead>
+                                        <tr>
+                                            <th>SI</th>
+                                            <th>Item</th>
+                                            <th>Quantity</th>
+                                            <!-- <th>price</th> -->
+                                            <th style="width: 200px">Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        
+                                        {% for cd in sto_details %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ cd.item_details.name }}</td>
+                                            <td>{{ cd.quantity }}</td>
+                                            <!-- <td>{{ cd.price }}</td> -->
+                                            <td>{{ cd.remarks|default:"N/A" }} </td>
+                                        </tr>
+                                        {% endfor %}
+                                        <tr>
+                                            <td colspan="2">Total Quantity:</td>
+                                        	<td>{{ stc.total_qty }}</td>
+                                        	<td ></td>
+                                        </tr>
+                                    </tbody>
+                                 </table>
+                            </div>
+
+                            <div class="row" style="margin-top: 100px">
+                                <div class="col-xs-3">
+                                    <h4 class="text-center">Prepared By</h4>
+                                </div>
+                                <div class="col-xs-2">
+                                    <h4 class="text-center">Manager</h4>
+                                </div>
+                                <div class="col-xs-3">
+                                    <h4 class="text-center">Authorised By</h4>
+                                </div>
+                                <div class="col-xs-2">
+                                    <h4 class="text-center">Received By</h4>
+                                </div>
+                                <div class="col-xs-2">
+                                    <h4 class="text-center">Technician</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+    <script src="{% static 'plugins/jquery/jquery-2.1.4.min.js' %}"></script>
+
+    <script>
+        $.noConflict();
+        function printFunction() {
+            window.print();
+        };
+    </script>
+{% endblock %}

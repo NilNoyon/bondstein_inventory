@@ -1,0 +1,123 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Floating Order list{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Floating Order List</h4>
+                        <div class="panel-control">
+                            <a href="{% url 'add_fo' %}"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-plus"></i> Add</button></a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive m-t-sm">
+                           <table class="table table-hover" id="soTable">
+                               <thead>
+                                   <tr>
+                                       <th>Order No.</th>
+                                       <th>Delivery Person</th>
+                                       <th>Phone No</th>
+                                       <th>Date</th>
+                                       <th>Total Qty</th>
+                                       <th>Total Sell</th>
+                                       <th>Total Return</th>
+                                       <th>Remarks</th>
+                                       <th>Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for p in floating_orders %}
+                                   <tr id="so-{{ p.id }}">
+                                       <th scope="row">{{ p.order_no }}</td>
+                                       <th scope="row">{{ p.delivery_person|upper }}</td>
+                                       <th scope="row">{{ p.phone_no }}</td>
+                                       <th scope="row">{{ p.takeover_date|date:'j F, Y' }}</td>
+                                       <th scope="row">{{ p.get_total_item }}</td>
+                                       <th scope="row">{{ p.get_total_sell }}</td>
+                                       <th scope="row">{{ p.total_return }}</td>
+                                       <td scope="row">{{ p.remarks }}</td>
+                                       <td scope="row" class="m-h-xs">
+                                           <a type="button" class="btn btn-success btn-xs" href="{% url 'fo_details' p.id %}"><i class="fa fa-eye"></i> view</a>
+                                           <a href="{% url 'generate_so' p.id %}"><button class="btn btn-success btn-xs"><i class="fa fa-plus"></i></button></a>
+                                           <!-- <button type="button" class="btn btn-google btn-xs" id="deleteSO" data-id="{{ p.id }}"><i class="fa fa-close"></i></button> -->
+                                           {% if p.total_return == 0 %}
+                                           <a href="{% url 're_stock' p.id %}"><button class="btn btn-success btn-xs"><i class="fa fa-list"></i></button></a>
+                                           {% endif %}
+                                       </td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script>
+
+    $('#soTable').DataTable({
+        "ordering": false,
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        "columnDefs": [{
+            "targets": 1,
+            "orderable": false
+        }]
+    });
+
+
+    $("#soTable").on('click', '#deleteSO', function(){
+        var id = $(this).data('id');
+        if (confirm('are you sure you want to remove this Sales Order?')==true){
+            $.ajax({
+                url : "{% url 'delete_fo' %}",
+                type : "POST",
+                data : { id : id },
+                success : function(data) {
+                    $('#so-'+id).hide();
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.success('Sales Order Deleted Successfully');
+                },
+
+                error : function(xhr,errmsg,err) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3500
+                    };
+                    toastr.error('Oops! We have encountered an error.');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+</script>
+{% endblock %}

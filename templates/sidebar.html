@@ -55,11 +55,12 @@
                 </a>
                 <ul class="sub-menu">
                     <li><a href="{% url 'scanned_product_list' %}">Scanned Products</a></li>
+                    <li><a href="{% url 'scanned_item_barcode' %}">Item Wise Scanned</a></li>
                     <li><a href="{% url 'stock_list' %}">Stock</a></li>
                     <li><a href="{% url 'stock_log' %}">Stock Log</a></li>
                 </ul>
             </li>
-            <li class="droplink">
+            <!-- <li class="droplink">
                 <a href="#">
                     <span class="menu-icon icon-users"></span>
                     <p>Client</p>
@@ -68,7 +69,7 @@
                 <ul class="sub-menu">
                     <li><a href="{% url 'client_list' %}">Clients</a></li>
                 </ul>
-            </li>
+            </li> -->
             <li class="droplink">
                 <a href="#">
                     <span class="menu-icon icon-grid"></span>
@@ -78,8 +79,43 @@
                 <ul class="sub-menu">
                     <li><a href="{% url 'so_list' %}">SO List</a></li>
                     <li><a href="{% url 'add_so' %}">Add SO</a></li>
+                </ul>
+            </li>
+            <li class="droplink">
+                <a href="#">
+                    <span class="menu-icon icon-grid"></span>
+                    <p>Transfer Item</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
                     <li><a href="{% url 'sto_list' %}">STO List</a></li>
                     <li><a href="{% url 'add_sto' %}">Add STO</a></li>
+                    <li><a href="{% url 'receive_sto' %}">receive STO</a></li>
+                </ul>
+            </li>
+            <li class="droplink">
+                <a href="#">
+                    <span class="menu-icon icon-grid"></span>
+                    <p>Floating Item</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li><a href="{% url 'fi_list' %}">Floating Item List</a></li>
+                    <li><a href="{% url 'add_fo' %}">Add FO</a></li>
+                </ul>
+            </li>
+            <li class="droplink">
+                <a href="#">
+                    <span class="menu-icon fa fa-bar-chart"></span>
+                    <p>Report</p>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li><a href="{% url 'add_channel_demand' %}">Add Channel Demand</a></li>
+                    <li><a href="{% url 'daily_inventory_report' %}">Daily Report</a></li>
+                    <li><a href="#">Weekly Report</a></li>
+                    <li><a href="{% url 'monthly_inventory_report' %}">Monthly Report</a></li>
+                    <li><a href="{% url 'forecast_report' %}">Forecast Report</a></li>
                 </ul>
             </li>
             {% if request.user.is_superuser %}
@@ -92,6 +128,7 @@
                 <ul class="sub-menu">
                     <li><a href="{% url 'users:other_settings' %}">Role, Warehouse, Status</a></li>
                     <li><a href="{% url 'users:users_settings' %}">Users</a></li>
+                    <li><a href="{% url 'users:user_access_control_setup' %}">Users Permission</a></li>
                 </ul>
             </li>
             {% endif %}

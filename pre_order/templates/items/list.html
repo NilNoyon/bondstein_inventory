@@ -106,7 +106,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="name">Name:</label>
-                                    <input name="name" type="text" class="form-control" id="item_name" placeholder="Enter Category Name...">
+                                    <input name="name" type="text" class="form-control" id="cname" placeholder="Enter Category Name...">
                                 </div>
                             </div>
                         </div>
@@ -145,12 +145,12 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="name">Name:</label>
-                                    <input name="name" type="text" class="form-control" id="name" placeholder="Enter Category Name...">
+                                    <input name="name" type="text" class="form-control" id="iname" placeholder="Enter Item Name...">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <label for="category">Category:</label>
-                                <select class="form-control m-b-sm category" id="category" name="category">
+                                <select class="form-control m-b-sm select2 category" id="category" name="category">
                                     <option value="">Select A Category</option>
                                     {% for category in item_categories %}
                                     <option value="{{ category.id }}">{{ category.name }}</option>
@@ -185,7 +185,7 @@
 <script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
 <script src="{% static 'plugins/select2/js/select2.js' %}"></script>
 <script>
-    // $('.role').select2();
+    // $('.category').select2();
     // $('.warehouse').select2();
 
 
@@ -208,7 +208,7 @@
             data : { id : id },
             success : function(data) {
                 $('#category_id').val(id);
-                $('#name').val(data['name']);
+                $('#cname').val(data['name']);
                 $('#description').val(data['description']);
                 
                 $("#categoryForm").attr('action', '{% url "update_category" %}');
@@ -281,8 +281,8 @@
             data : { id : id },
             success : function(data) {
                 $('#item_id').val(id);
-                $('#item_name').val(data['name']);
-                $('#category').val(data['category']).trigger('change');
+                $('#iname').val(data['name']);
+                $('#category').val(data['category_id']).trigger('change');
                 $('#item_description').val(data['description']);
                 
                 $("#itemForm").attr('action', '{% url "update_item" %}');

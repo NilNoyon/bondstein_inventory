@@ -1,0 +1,233 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title %}Add Channel Demand Form{% endblock %}
+
+
+{% block css %}
+<link href="{% static 'plugins/datatables/css/jquery.datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/datatables/css/jquery.datatables_themeroller.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/bootstrap-datepicker/css/datepicker3.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'plugins/select2/css/select2.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+
+{% block content %}
+    <div id="main-wrapper" class="container-fluid p-h-lg">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Add Channel Demand</h4>
+                        <div class="panel-control">
+                            <a href="{% url 'pre_order_list' %}"><button class="btn btn-default btn-addon m-b-sm btn-xs"><i class="fa fa-list"></i> list</button></a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="m-t-sm">
+                            <form class="m-t-md" id="poForm" action="{% url 'save_channel_demand' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" id="po_id" value="{{ po.id }}">
+                                <div class="row no-m">
+                                    <div class="col-md-5">
+                                        <div class="panel panel-white">
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="channel_name">Channel Name:</label>
+                                                        <input name="name" type="text" class="form-control" id="channel_name" placeholder="Enter Channel Name..." value="{{ channel_name }}">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="client_name">Client Name:</label>
+                                                            <input name="client_name" type="text" class="form-control" id="client_name" placeholder="Enter Client Name..." value="{{ client_name }}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="month">Month:</label>
+                                                                <select class="form-control month" id="month"
+                                                                  name="month" data-title="Select a Month">
+                                                                  <option value="" disabled selected></option>
+                                                                  <option value="1">January</option>
+                                                                  <option value="2">February</option>
+                                                                  <option value="3">March</option>
+                                                                  <option value="4">April</option>
+                                                                  <option value="5">May</option>
+                                                                  <option value="6">June</option>
+                                                                  <option value="7">July</option>
+                                                                  <option value="8">August</option>
+                                                                  <option value="9">September</option>
+                                                                  <option value="10">October</option>
+                                                                  <option value="11">November</option>
+                                                                  <option value="12">December</option>
+                                                              </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="year">Year</label>
+                                                            <select class="form-control year" id="year"
+                                                                name="year" data-title="Select a Year">
+                                                                <option value="" disabled selected></option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                  <div class="col-md-6">
+                                                    <label for="warehouse">Warehouse:</label>
+                                                    {% if request.user.is_superuser %}
+                                                        <select class="form-control m-b-sm warehouse" id="warehouse" name="warehouse" required>
+                                                            <option value="">Select A Warehouse</option>
+                                                            {% for warehouse in warehouses %}
+                                                            <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    {% else %}
+                                                        <select class="form-control m-b-sm warehouse" id="warehouse" name="warehouse" required>
+                                                            <option value="{{ request.user.warehouse.id }}">{{ request.user.warehouse.name }}</option>
+                                                        </select>
+                                                    {% endif %}
+                                                  </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="panel panel-white">
+                                            <div class="panel-body">
+                                                <div class="row duplicateMe" id="1">
+                                                    <div class="col-md-3">
+                                                        <select class="form-control m-b-sm item_details" id="item_details_1" name="device_type" required>
+                                                            <option value="">Select An Item</option>
+                                                            {% for item in item_details %}
+                                                            <option value="{{ item.id }}">{{ item.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <input type="number" class="form-control quantity" id="quantity_1" name="quantity" placeholder="Quantity" min="0">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control order_probability" name="order_probability" id="order_probability_1" placeholder="Order Probability">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <input type="number" class="form-control weight" name="weight" id="weight_1" step="0.1" min="0" placeholder="Weight">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <input type="number" class="form-control final_demand" name="final_demand" id="final_demand_1" placeholder="Final Demand" min="0">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <button type="button" class="btn btn-success" style="margin-top: 1px;" id="repeat"><i class="fa fa-plus"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success btn-block"><h4>Save Information</h4></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'plugins/datatables/js/jquery.datatables.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.js' %}"></script>
+<script>
+    // Select2
+    $('.month').select2({placeholder: "Select a month"});
+    $('.year').select2({placeholder: "Select a year"});
+    $('.item').select2({placeholder: "Select Item Head"});
+    $('.item_details').select2({placeholder: "Select Item"});
+    $('.warehouse').select2({placeholder: "Select Warehouse"});
+
+    // DatePicker
+    $('.date-picker').datepicker({
+        orientation: "top auto",
+        autoclose: true,
+        todayBtn: 'linked',
+        startDate: new Date()
+    });
+
+    let startYear = 2021;
+    let endYear = startYear+100;
+    for (i = startYear; i < endYear; i++)
+    {
+      $('#year').append($('<option />').val(i).html(i));
+    }
+
+    // Duplicate Form Data
+    $('body').on('click', '#repeat', function(){
+
+        var lastid = parseInt($('div.duplicateMe:last')[0].id);
+
+        $duplicate = $('.duplicateMe');
+        $duplicate.find('span').remove();
+        var clone = $duplicate.html();
+
+        $duplicate.parent().append('<div class="row duplicateMe" id="'+(parseInt(lastid)+1)+'">' + clone + '</div>');
+
+    // $duplicate.parent().append('<div class="row duplicateMe">'+clone+'</div>');
+        $('.item_details').select2({placeholder: "Select Item..", width: '100%', width: '100%'});
+        $duplicate.removeClass('duplicateMe');
+        $(this).parent().append('<button type="button" class="btn btn-danger" style="margin-top: 1px;" id="remove'+parseInt(lastid)+'"><i class="fa fa-close"></i></button>');
+        $(this).remove();
+        
+        let item_details = 'item_details_'+(parseInt(lastid)+1);
+        let order_probability = 'order_probability_'+(parseInt(lastid)+1);
+        let weight = 'weight_'+(parseInt(lastid)+1);
+        let quantity = 'quantity_'+(parseInt(lastid)+1);
+        let final_demand = 'final_demand_'+(parseInt(lastid)+1);
+        $('div.duplicateMe:last div.col-md-3 select').attr("id", item_details);
+        $('div.duplicateMe:last div.col-md-2 div.form-group input.quantity').attr("id", quantity);
+        $('div.duplicateMe:last div.col-md-2 div.form-group input.order_probability').attr("id", order_probability);
+        $('div.duplicateMe:last div.col-md-2 div.form-group input.weight').attr("id", weight);
+        $('div.duplicateMe:last div.col-md-2 div.form-group input.final_demand').attr("id", final_demand);
+    });
+
+    // Remove Form data
+    $('body').on('click', '.btn-danger', function(){
+        var id = this.id;
+        $('#'+id).parent().parent().remove();
+    });
+
+    $("#poForm").on('change', '#item', function(){
+        var item = $(this).val();
+        $.ajax({
+            url : "{% url "ajax_get_item_details" %}",
+            type : "POST",
+            data : { item : item },
+            success : function(data) {
+                $(".item_details").append($('<option>Select Item</option>'));
+                for (var i = 0; i < data.length; i++) {
+                  $(".item_details").append($('<option>', {value: data[i].id, text: data[i].name}));
+                }
+                $(".item_details").select2({
+
+                });
+            }
+        });
+    });
+
+</script>
+{% endblock %}

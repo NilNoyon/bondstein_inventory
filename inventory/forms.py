@@ -45,3 +45,34 @@ class STCDetailsForm(forms.ModelForm):
 		super(STCDetailsForm, self).__init__(*args, **kwargs)
 		self.fields['remarks'].required = False
 		self.fields['barcode'].required = False
+
+class STCBarcodeForm(forms.ModelForm):
+	class Meta:
+		model = STCBarcode
+		fields = "__all__"
+
+class FOForm(forms.ModelForm):
+	class Meta:
+		model = FloatingSalesOrder
+		fields = "__all__"
+
+	def __init__(self, *args, **kwargs):
+		super(FOForm, self).__init__(*args, **kwargs)
+		self.fields['total_item'].required = False
+		self.fields['total_sell'].required = False
+		self.fields['total_return'].required = False
+
+class FODetailsForm(forms.ModelForm):
+	class Meta:
+		model = FloatingSalesDetails
+		fields = "__all__"
+
+class CDForm(forms.ModelForm):
+	class Meta:
+		model = ChannelDemand
+		fields = "__all__"
+
+class CDDetailsForm(forms.ModelForm):
+	class Meta:
+		model = ChannelDemandDetails
+		fields = "__all__"

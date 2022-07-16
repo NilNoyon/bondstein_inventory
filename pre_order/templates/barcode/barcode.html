@@ -11,19 +11,16 @@
         @page {
           size: A4;
           margin: 5mm;
+          -webkit-print-color-adjust: exact;
         }
         @media print {
           body {
-            -webkit-print-color-adjust: exact;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
             font-size: 8px;
             width: 100%;
             margin: 0 auto;
           }
-        }
-
-        @font-face {
-            font-family: 'Code139';
-            src: url('{% static "css/barcode.TTF" %}')  format('truetype');
         }
 
         header nav, footer {
@@ -55,14 +52,9 @@
         .table > tbody > tr > td{
             border: 1px solid #333;
         }
-        .table-empty > tbody > tr > td{
-            border: 2px solid #fff;
-            color: #fff !important;
-            -webkit-print-color: #fff;
-        }
         .canv {
-            color: #fff;
-            -webkit-print-color-adjust: exact;
+            background-color: black;
+            color: white;
             width: 180px;
             height: 37px;
         }
@@ -73,8 +65,8 @@
     {% for p in barcodes %}
             <table class="table table-bordered">
                 <tbody>
-                    <tr class="bg-dark light">
-                        <td class="text-center" colspan="4"><b>{{ p.po_details.item_details.name|upper }}</b></td>
+                    <tr style="background-color: black !important;color: white !important;">
+                        <td class="text-center" colspan="4" id="{{ forloop.counter }}"><b>{{ p.po_details.item_details.name|upper }}</b></td>
                     </tr>
                     
                     <tr>
@@ -82,7 +74,7 @@
                             <canvas class="new_barcode" data-barcode="{{ p.barcode }}"></canvas>
                         </td>
                     </tr>
-                    <tr>
+                    <tr style="background-color: black !important;color: white !important;">
                         <td class="text-left" colspan="2"><b>Device ID: {{ p.barcode }}</b></td>
                         <td class="text-right" colspan="2"><b>BST ID: {{ p.bst }}</b></td>
                     </tr>
@@ -106,12 +98,14 @@
                 font:"Monospaced",
                 textAlign:"center",
                 fontSize: 15,
-                fontWeight: "bolder",
+                // fontWeight: "bolder",
                 backgroundColor:"",
                 lineColor:"#000"
             });
         });
-
+        
+    </script>
+    <script type="text/javascript">
         window.onload = function() {
             setTimeout(function () { window.print(); }, 500);
         }

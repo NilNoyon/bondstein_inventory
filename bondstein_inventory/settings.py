@@ -78,26 +78,12 @@ WSGI_APPLICATION = 'bondstein_inventory.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#          'ENGINE': 'mysql.connector.django',
-#          'NAME': 'stockdb',
-#          'USER': 'root',
-#          'PASSWORD': 'pass1234',
-#          'HOST': '127.0.0.1',
-#          'PORT': '3306',
-#          'OPTIONS': {
-#              'sql_mode': 'traditional',
-#              'autocommit': True,
-#             }
-#         }
-# }
 DATABASES = {
     'default': {
          'ENGINE': 'mysql.connector.django',
-         'NAME': 'bondstei_invms',
-         'USER': 'bondstei_invms',
-         'PASSWORD': 'Py#32Inv.',
+         'NAME': 'stockdb',
+         'USER': 'root',
+         'PASSWORD': 'pass1234',
          'HOST': '127.0.0.1',
          'PORT': '3306',
          'OPTIONS': {
@@ -106,6 +92,20 @@ DATABASES = {
             }
         }
 }
+# DATABASES = {
+#     'default': {
+#          'ENGINE': 'mysql.connector.django',
+#          'NAME': 'bondstei_invms',
+#          'USER': 'bondstei_invms',
+#          'PASSWORD': 'Py#32Inv.',
+#          'HOST': '127.0.0.1',
+#          'PORT': '3306',
+#          'OPTIONS': {
+#              'sql_mode': 'traditional',
+#              'autocommit': True,
+#             }
+#         }
+# }
 
 
 # Password validation
@@ -136,9 +136,9 @@ TIME_ZONE = 'Asia/Dhaka'
 
 USE_I18N = True
 
-USE_L10N = True
+# USE_L10N = True
 
-USE_TZ = True
+# USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)

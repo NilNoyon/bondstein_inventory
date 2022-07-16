@@ -45,7 +45,7 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="order_no">Order No:</label>
-                                                            <input name="order_no" type="text" class="form-control" id="po_no" placeholder="Enter PO Number..." value="{{ po.po_no }}">
+                                                            <input name="order_no" type="text" class="form-control" id="po_no" placeholder="Enter PO Number..." value="{{ order_no }}" readonly>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -60,7 +60,7 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="order_grand_total">Order Grand Total</label>
-                                                            <input name="order_grand_total" type="number" class="form-control" id="order_grand_total" placeholder="Enter Grand Total..." value="{{ po.order_grand_total|default:0 }}">
+                                                            <input name="order_grand_total" type="number" class="form-control" id="order_grand_total" placeholder="Enter Grand Total...">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -80,16 +80,22 @@
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label for="prepared_by">Prepared By:</label>
-                                                            <input name="prepared_by" type="text" class="form-control" id="quote" placeholder="Enter Username..." value="{{ po.prepared_by }}">
-                                                        </div>
+                                                        <label for="prepared_by">Prepared By:</label>
+                                                        <select class="form-control m-b-sm prepared_by" id="prepared_by" name="prepared_by" required>
+                                                            <option value="">Select A Prepared By</option>
+                                                            {% for user in users %}
+                                                            <option value="{{ user.id }}">{{ user.fullname }}</option>
+                                                            {% endfor %}
+                                                        </select>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label for="checked_by">Checked By</label>
-                                                            <input name="checked_by" type="text" class="form-control" id="checked_by" placeholder="Enter Username..." value="{{ po.checked_by}}">
-                                                        </div>
+                                                        <label for="checked_by">Checked By:</label>
+                                                        <select class="form-control m-b-sm checked_by" id="checked_by" name="checked_by" required>
+                                                            <option value="">Select A Checked By</option>
+                                                            {% for user in users %}
+                                                            <option value="{{ user.id }}">{{ user.fullname }}</option>
+                                                            {% endfor %}
+                                                        </select>
                                                     </div>
                                                 </div>
                                                 <div class="row">
@@ -111,18 +117,9 @@
                                     <div class="col-md-7">
                                         <div class="panel panel-white">
                                             <div class="panel-body">
-                                                <div class="row duplicateMe">
-                                                    <input type="hidden" name="pd_id" value="0">
-                                                    <!-- <div class="col-md-3">
-                                                        <select class="form-control m-b-sm item" id="item" name="item" required>
-                                                            <option value="">Select An Item</option>
-                                                            {% for item in items %}
-                                                            <option value="{{ item.id }}">{{ item.name }}</option>
-                                                            {% endfor %}
-                                                        </select>
-                                                    </div> -->
+                                                <div class="row duplicateMe" id="1">
                                                     <div class="col-md-3">
-                                                        <select class="form-control m-b-sm item_details" id="item_details" name="item_details" required>
+                                                        <select class="form-control m-b-sm item_details" id="item_details_1" name="item_details" required>
                                                             <option value="">Select An Item - (unit price)</option>
                                                             {% for item in item_details %}
                                                             <option value="{{ item.id }}">{{ item.name }} - {{ item.unit_price }}</option>
@@ -131,12 +128,12 @@
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="form-group">
-                                                            <input type="number" class="form-control quantity" name="quantity" placeholder="Quantity">
+                                                            <input type="number" class="form-control quantity" id="quantity_1" name="quantity" placeholder="Quantity">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="form-group">
-                                                            <input type="number" class="form-control amount" name="amount" placeholder="Amount">
+                                                            <input type="number" class="form-control amount" name="amount" id="amount_1" placeholder="Amount">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-1">
@@ -169,6 +166,8 @@
     $('.supplier').select2({placeholder: "Select Supplier"});
     $('.item').select2({placeholder: "Select Item Head"});
     $('.item_details').select2({placeholder: "Select Item"});
+    $('.checked_by').select2({placeholder: "Select User"});
+    $('.prepared_by').select2({placeholder: "Select User"});
 
     // DatePicker
     $('.date-picker').datepicker({
@@ -182,21 +181,34 @@
 
     // Duplicate Form Data
     $('body').on('click', '#repeat', function(){
+
+        var lastid = parseInt($('div.duplicateMe:last')[0].id);
+        console.log('_id:',lastid)
+
         $duplicate = $('.duplicateMe');
-
         $duplicate.find('span').remove();
-
         var clone = $duplicate.html();
-		$('.duplicateMe').parent().append('<div class="row duplicateMe">'+clone+'</div>');
 
-        $(this).parent().append('<button type="button" class="btn btn-danger" style="margin-top: 1px;" id="remove"><i class="fa fa-close"></i></button>');
-        $(this).remove();
+        $duplicate.parent().append('<div class="row duplicateMe" id="'+(parseInt(lastid)+1)+'">' + clone + '</div>');
+
+		// $duplicate.parent().append('<div class="row duplicateMe">'+clone+'</div>');
+        $('.item_details').select2({placeholder: "Select Item..", width: '100%', width: '100%'});
         $duplicate.removeClass('duplicateMe');
+        $(this).parent().append('<button type="button" class="btn btn-danger" style="margin-top: 1px;" id="remove'+parseInt(lastid)+'"><i class="fa fa-close"></i></button>');
+        $(this).remove();
+        
+        let item_details = 'item_details_'+(parseInt(lastid)+1);
+        let amount = 'amount_'+(parseInt(lastid)+1);
+        let quantity = 'quantity_'+(parseInt(lastid)+1);
+        $('div.duplicateMe:last div.col-md-3 select').attr("id", item_details);
+        $('div.duplicateMe:last div.col-md-3 div.form-group input.quantity').attr("id", quantity);
+        $('div.duplicateMe:last div.col-md-3 div.form-group input.amount').attr("id", amount);
     });
 
     // Remove Form data
-    $('body').on('click', '#remove', function(){
-        $(this).parent().parent().remove();
+    $('body').on('click', '.btn-danger', function(){
+        var id = this.id;
+        $('#'+id).parent().parent().remove();
     });
 
     $("#poForm").on('change', '#item', function(){
@@ -206,10 +218,6 @@
             type : "POST",
             data : { item : item },
             success : function(data) {
-                // $(".item_details").empty().append('<option value=""></option>');
-                // $(".item_details").select2('destroy');
-                // $(".item_details").select2({placeholder: "Select Item", data: data[0], width: '100%'});
-
                 $(".item_details").append($('<option>Select Item</option>'));
                 for (var i = 0; i < data.length; i++) {
                   $(".item_details").append($('<option>', {value: data[i].id, text: data[i].name}));
@@ -220,6 +228,34 @@
             }
         });
     });
+
+    $('body').on('keyup', '.quantity', function(){
+        let row = this.id;
+        let id = row.substr(row.length - 1)
+        let item_details = $("#item_details_"+id+" option:selected").text()
+        let quantity = $(this).val();
+        if(item_details){
+            let price = item_details.split("-").pop()
+            let amount = parseFloat(price) * parseInt(quantity);
+            $('#amount_'+id).prop('readonly', false).val(amount);
+        }else{
+            $('#amount_'+id).val(0);
+        }
+        calculate_amount()
+    })
+
+    function calculate_amount(){
+        var total_qty = 0
+        $('.amount').each(function (index, item) {
+            if ($(this).val()) {
+                total_qty += parseInt($(this).val())
+                $('#order_grand_total').val(total_qty)
+            }else{
+                $('#order_grand_total').val(total_qty)
+            }
+
+        });
+    }
 
 </script>
 {% endblock %}
